@@ -12,13 +12,18 @@ import {
 } from 'react-native';
 const SEARCH_ICON = require('./images/tabs/search_icon.png');
 var BACK_ICON = require('./images/tabs/nav_return.png');
-var SEARCH_URL = new Request('http://drmlum.rdgchina.com/drmapp/copyright/search');
+var SEARCH_URL = 'http://drmlum.rdgchina.com/drmapp/copyright/search';
+var searchList;
+import LoadView from './loading'
+import NetUitl from './netUitl'
+import StringBufferUtils from './StringBufferUtil'
 export default class SearchActivity extends Component {
     constructor(props) {
         super(props);
         this.state = {
             keyWord: '',
-            history: {}
+            history: {},
+            show: true
 
 
         };
@@ -31,25 +36,26 @@ export default class SearchActivity extends Component {
             keyWord: this.props.keyword
 
         })
-        // let formData = new FormData();
-        // formData.append("title", this.state.keyWord);
-        // this.fetchData(SEARCH_URL,formData);
-    }
-    // 数据请求 
-    fetchData(url,formdata) {
-        fetch(url, {
-            method: 'POST',
-            headers: {},
-            body: formdata,
-        })
-            .then((response) => response.json())
-            .then((responseData) => {
-                this.addItemKey(responseData.result)
 
-            })
-            .catch((error) => {
-                console.error(error);
-            }).done();
+
+        StringBufferUtils.init();
+        StringBufferUtils.append('title=' + this.props.keyword);
+        StringBufferUtils.append('&&pageNo=' + '1');
+        StringBufferUtils.append('&&recordsperpage=' + 10);
+        let params = StringBufferUtils.toString();
+        this.fetchData(params);
+    }
+
+
+
+    fetchData(param) {
+        //get请求,以百度为例,没有参数,没有header
+        var that=this;
+        NetUitl.post(SEARCH_URL, param, '', function (set) {
+            // alert(set.result);
+            //下面的就是请求来的数据
+            that.addItemKey(set.result);
+        })
 
     }
     //整合数据
@@ -64,8 +70,10 @@ export default class SearchActivity extends Component {
 
             }
             this.setState({
-                history: rulelist
+                history: rulelist,
+                show: false
             });
+
 
         }
 
@@ -75,11 +83,10 @@ export default class SearchActivity extends Component {
     }
     _goSearchResult(itemData) {
 
-        alert(itemData.item.value);
+        // alert(itemData.item.value);
 
     }
     _backOnclick() {
-
         this.props.navigator.pop(
             {
 
@@ -87,13 +94,28 @@ export default class SearchActivity extends Component {
         );
 
     }
-    // 返回历史记录Item
-    _renderHistoryItem = (itemData) => {
+    //点击列表点击每一行
+    clickItem(item, index) {
+        //或者写成 const navigator = this.props.navigator;
+        //为什么这里可以取得 props.navigator?请看上文:
+        //<Component {...route.params} navigator={navigator} />
+        //这里传递了navigator作为props
+        this.props.navigator.push({
+            component: WebviewDetail,
+            params: {
+                root_url: item.item.tourl,
+                title: item.item.title,
+            }
+        })
+    }
+    // 返回国内法规Item
+    _renderSearchItem = (itemData, index) => {
         return (
-            <View style={{ height: 45, justifyContent: 'center', backgroundColor: '#ffffff' }}>
-                <TouchableNativeFeedback onPress={() => this._goSearchResult(itemData)}>
-                    <View style={{ height: 45, flexDirection: 'column', justifyContent: 'center' }}>
-                        <Text style={styles.rule_item_title}>{itemData.item.value}</Text>
+            <View style={{ height: 60, justifyContent: 'center' }}>
+                <TouchableNativeFeedback onPress={() => this.clickItem(itemData, index)}>
+                    <View style={{ height: 60, flexDirection: 'column', justifyContent: 'center' }}>
+                        <Text style={styles.rule_item_title}>{itemData.item.name}</Text>
+                        <Text style={styles.rule_item_time}>{itemData.item.certificatenumber}</Text>
 
                     </View>
                 </TouchableNativeFeedback>
@@ -112,6 +134,7 @@ export default class SearchActivity extends Component {
                     barStyle={'default'}
                     networkActivityIndicatorVisible={true}
                 />
+                {/*{this.state.show == true ? (<LoadView />) : (null)}*/}
                 {/*搜索头部控件*/}
                 <View style={styles.top_layout}>
                     <View style={styles.left_view} >
@@ -136,22 +159,14 @@ export default class SearchActivity extends Component {
 
                 </View>
 
-                <ScrollView>
-                    <View style={{ flex: 1 }}>
+                <FlatList
+                    style={{ backgroundColor: '#ffffff' }}
+                    ref={(flatList) => this.searchList = flatList}
+                    ItemSeparatorComponent={this._separator}
+                    renderItem={this._renderSearchItem}
+                    data={this.state.history}>
+                </FlatList>
 
-
-                        <FlatList
-                            style={{ backgroundColor: '#ffffff' }}
-                            ref={(flatList) => this.historyList = flatList}
-                            ItemSeparatorComponent={this._separator}
-                            renderItem={this._renderHistoryItem}
-                            data={this.state.history}>
-                        </FlatList>
-                        <View style={{ height: 1, backgroundColor: '#e2e2e2' }}></View>
-
-                    </View>
-
-                </ScrollView>
 
             </View>
 

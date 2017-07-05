@@ -71,7 +71,7 @@ export default class SearchActivity extends Component {
             this.saveHistoryData(json);
         }
 
-        this._goSearchResult(null,hotword,false)
+        this._goSearchResult(null, hotword, false)
 
 
     }
@@ -155,9 +155,13 @@ export default class SearchActivity extends Component {
     }
     _cancleBtn = () => {
 
-        this.clearBtn();
+        this.props.navigator.pop(
+            {
+
+            }
+        );
     }
-    _goSearchResult = (itemData,keyWord, isSearch) => {
+    _goSearchResult = (itemData, keyWord, isSearch) => {
         if (isSearch) {
 
             this.props.navigator.push({
@@ -183,7 +187,7 @@ export default class SearchActivity extends Component {
     _renderHistoryItem = (itemData) => {
         return (
             <View style={{ height: 45, justifyContent: 'center', backgroundColor: '#ffffff' }}>
-                <TouchableNativeFeedback onPress={() => this._goSearchResult(itemData,'',true)}>
+                <TouchableNativeFeedback onPress={() => this._goSearchResult(itemData, '', true)}>
                     <View style={{ height: 45, flexDirection: 'column', justifyContent: 'center' }}>
                         <Text style={styles.rule_item_title}>{itemData.item.value}</Text>
 

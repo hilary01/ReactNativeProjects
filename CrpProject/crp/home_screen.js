@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import ViewPager from 'react-native-viewpager';
 import LoadView from './loading'
-var HOME_URL = new Request('http://drmlum.rdgchina.com/drmapp/index/indexlist');
+var HOME_URL = 'http://drmlum.rdgchina.com/drmapp/index/indexlist';
 const RULE_BG = require('./images/tabs/rule_bg.png');
 const RULE_ICONS = require('./images/tabs/rule_icons.png');
 const RIGHT_ICONS = require('./images/tabs/icon_more.png');
@@ -21,6 +21,7 @@ const NEWS_ICONS = require('./images/tabs/news_icon.png');
 const NOTICE_ICONS = require('./images/tabs/notice_icons.png');
 const POINT_ICONS = require('./images/tabs/point_icons.png');
 import WebviewDetail from './webdetail';
+import NetUitl from './netUitl'
 export default class TopScreen extends Component {
     constructor(props) {
         super(props);
@@ -42,20 +43,14 @@ export default class TopScreen extends Component {
     }
     // 数据请求 
     fetchData(url) {
-        fetch(url)
-            .then((response) => response.json())
-            .then((responseData) => {
-                this.setState({
-                    dataSource: this.state.dataSource.cloneWithPages(responseData.adlist),
-                });
-                this.addItemKey(responseData.statutelist, responseData.newslist, responseData.noticelist)
-
-            })
-            .catch((error) => {
-                ToastAndroid.show('网络异常，请稍后再试!', ToastAndroid.SHORT);
-                console.error(error);
-            }).done();
-
+        var that = this;
+        NetUitl.post(url, '', '', function (responseData) {
+            //下面的就是请求来的数据
+            that.setState({
+                dataSource: that.state.dataSource.cloneWithPages(responseData.adlist),
+            });
+            that.addItemKey(responseData.statutelist, responseData.newslist, responseData.noticelist)
+        })
     }
 
     //整合数据
