@@ -8,7 +8,8 @@ import {
     Image,
     TouchableNativeFeedback,
     StatusBar,
-    ScrollView
+    ScrollView,
+    ToastAndroid
 } from 'react-native';
 const SEARCH_ICON = require('./images/tabs/search_icon.png');
 var BACK_ICON = require('./images/tabs/nav_return.png');
@@ -17,6 +18,8 @@ var searchList;
 import LoadView from './loading'
 import NetUitl from './netUitl'
 import StringBufferUtils from './StringBufferUtil'
+var TYPE_ICON = require('./images/tabs/type_icon.png');
+var TIME_ICON = require('./images/tabs/type_time.png');
 export default class SearchActivity extends Component {
     constructor(props) {
         super(props);
@@ -50,7 +53,7 @@ export default class SearchActivity extends Component {
 
     fetchData(param) {
         //get请求,以百度为例,没有参数,没有header
-        var that=this;
+        var that = this;
         NetUitl.post(SEARCH_URL, param, '', function (set) {
             // alert(set.result);
             //下面的就是请求来的数据
@@ -96,26 +99,32 @@ export default class SearchActivity extends Component {
     }
     //点击列表点击每一行
     clickItem(item, index) {
-        //或者写成 const navigator = this.props.navigator;
-        //为什么这里可以取得 props.navigator?请看上文:
-        //<Component {...route.params} navigator={navigator} />
-        //这里传递了navigator作为props
-        this.props.navigator.push({
-            component: WebviewDetail,
-            params: {
-                root_url: item.item.tourl,
-                title: item.item.title,
-            }
-        })
+        ToastAndroid.show('抱歉由于版权局权限原因，暂不支持点击', ToastAndroid.SHORT);
     }
     // 返回国内法规Item
     _renderSearchItem = (itemData, index) => {
+        var types = this._getType(itemData.item.category);
         return (
-            <View style={{ height: 60, justifyContent: 'center' }}>
+            <View style={{ height: 100, justifyContent: 'center' }}>
                 <TouchableNativeFeedback onPress={() => this.clickItem(itemData, index)}>
-                    <View style={{ height: 60, flexDirection: 'column', justifyContent: 'center' }}>
+                    <View style={{ height: 100, flexDirection: 'column', justifyContent: 'center' }}>
                         <Text style={styles.rule_item_title}>{itemData.item.name}</Text>
                         <Text style={styles.rule_item_time}>{itemData.item.certificatenumber}</Text>
+                        <Text style={styles.rule_item_time}>{itemData.item.realname}</Text>
+                        <View style={{ height: 1, backgroundColor: '#e2e2e2', marginTop: 5 }}></View>
+                        <View style={{ height: 40, flexDirection: 'row', marginTop: 5, flex: 1 }}>
+                            <View style={{ width: 140, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
+
+                                <Image style={{ width: 16, height: 16, marginLeft: 20 }} source={TYPE_ICON} />
+                                <Text style={{ textAlign: 'center', color: '#999999', fontSize: 13, marginLeft: 5 }}>{types}</Text>
+                            </View>
+                            <View style={{ width: 140, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
+
+                                <Image style={{ width: 16, height: 16 }} source={TIME_ICON} />
+                                <Text style={{ textAlign: 'center', color: '#999999', fontSize: 13, marginLeft: 5, marginRight: 10 }}>{itemData.item.djdatetime}</Text>
+                            </View>
+
+                        </View>
 
                     </View>
                 </TouchableNativeFeedback>
@@ -175,7 +184,74 @@ export default class SearchActivity extends Component {
 
     }
 
+    /**
+        * 返回类型
+        * @param {*} typeStr 
+        */
+    _getType(typeStr) {
+        var typeTitle = '';
 
+        if (null != typeStr && typeStr != '') {
+            switch (parseInt(typeStr)) {
+                case 1:
+                    typeTitle = "摄影";
+                    break;
+                case 2:
+                    typeTitle = "口述";
+                    break;
+                case 3:
+                    typeTitle = "音乐";
+                    break;
+                case 4:
+                    typeTitle = "戏剧";
+                    break;
+                case 5:
+                    typeTitle = "曲艺";
+                    break;
+                case 6:
+                    typeTitle = "舞蹈";
+                    break;
+                case 7:
+                    typeTitle = "杂技";
+                    break;
+                case 8:
+                    typeTitle = "美术";
+                    break;
+                case 9:
+                    typeTitle = "文字";
+                    break;
+                case 10:
+                    typeTitle = "电影";
+                    break;
+                case 11:
+                    typeTitle = "建筑";
+                    break;
+                case 12:
+                    typeTitle = "模型";
+                    break;
+                case 13:
+                    typeTitle = "摄制作品";
+                    break;
+                case 14:
+                    typeTitle = "地图";
+                    break;
+                case 15:
+                    typeTitle = "设计图";
+                    break;
+                case 16:
+                    typeTitle = "其他";
+                    break;
+
+            }
+
+
+        }
+
+
+        return typeTitle;
+
+
+    }
 }
 const styles = StyleSheet.create({
 
@@ -208,5 +284,12 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: '#000000',
         marginTop: 5
+    }, rule_item_time: {
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
+        paddingLeft: 20,
+        fontSize: 12,
+        color: '#999999',
+        marginTop: 2
     },
 });
