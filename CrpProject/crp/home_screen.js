@@ -22,6 +22,7 @@ const NOTICE_ICONS = require('./images/tabs/notice_icons.png');
 const POINT_ICONS = require('./images/tabs/point_icons.png');
 import WebviewDetail from './webdetail';
 import NetUitl from './netUitl';
+import NoticeActivity from './notice_list'
 export default class TopScreen extends Component {
     constructor(props) {
         super(props);
@@ -299,6 +300,15 @@ export default class TopScreen extends Component {
 
         ToastAndroid.show('抱歉由于版权局权限原因，暂不支持点击', ToastAndroid.SHORT);
     }
+    // 跳转到公告列表
+    _goNoticeActivity = () => {
+        this.props.navigator.push({
+            component: NoticeActivity,
+            params: {
+            }
+        })
+
+    }
     _separator = () => {
         return <View style={{ height: 1, backgroundColor: '#e2e2e2' }} />;
     }
@@ -391,10 +401,12 @@ export default class TopScreen extends Component {
                             <Text style={styles.rule_left_txt}>登记公告</Text>
 
                         </View>
-                        <View style={styles.rule_right}>
-                            <Text style={styles.rule_right_txt}>更多</Text>
-                            <Image style={styles.rule_right_img} source={RIGHT_ICONS} />
-                        </View>
+                        <TouchableNativeFeedback onPress={this._goNoticeActivity}>
+                            <View style={styles.rule_right}>
+                                <Text style={styles.rule_right_txt}>更多</Text>
+                                <Image style={styles.rule_right_img} source={RIGHT_ICONS} />
+                            </View>
+                        </TouchableNativeFeedback>
 
                     </View>
 
