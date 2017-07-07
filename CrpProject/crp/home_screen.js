@@ -21,7 +21,7 @@ const NEWS_ICONS = require('./images/tabs/news_icon.png');
 const NOTICE_ICONS = require('./images/tabs/notice_icons.png');
 const POINT_ICONS = require('./images/tabs/point_icons.png');
 import WebviewDetail from './webdetail';
-import NetUitl from './netUitl'
+import NetUitl from './netUitl';
 export default class TopScreen extends Component {
     constructor(props) {
         super(props);
@@ -30,10 +30,10 @@ export default class TopScreen extends Component {
             dataSource: new ViewPager.DataSource({
                 pageHasChanged: (p1, p2) => p1 !== p2,
             }),
+            show: true,
             ruleData: {},
             newsData: {},
             noticeData: {},
-            show: true
         }
     }
 
@@ -92,6 +92,7 @@ export default class TopScreen extends Component {
                 noticeData: noticeList,
                 show: false
             });
+
 
         }
     }
@@ -305,7 +306,7 @@ export default class TopScreen extends Component {
     render() {
         return (
             <View style={styles.main_view}>
-                {this.state.show == true ? (<LoadView />) : (null)}
+                {this.state.show == true ? (<LoadView size={10} color="#FFF" />) : (null)}
                 <View style={styles.page}>
                     <ViewPager
                         style={{ height: 140 }}

@@ -87,7 +87,8 @@ export default class SearchActivity extends Component {
                     var strs = [];
                     this.setState({
 
-                        history: strs
+                        history: strs,
+                        keyWord:''
 
                     })
                 }

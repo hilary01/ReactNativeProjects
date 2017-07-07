@@ -3,12 +3,11 @@ import {
     View,
     Text,
     ActivityIndicator,
-    Modal, 
+    Modal,
     StyleSheet,
     Platform,
     BackHandler
 } from 'react-native';
-
 export default class Loading extends Component {
 
     constructor(props) {
@@ -18,29 +17,6 @@ export default class Loading extends Component {
         }
 
     }
-    // componentWillMount() {
-    //     if (Platform.OS === 'android') {
-    //         BackAndroid.addEventListener('hardwareBackPress', this.onBackAndroid);
-    //     }
-    // }
-    // componentWillUnmount() {
-    //     if (Platform.OS === 'android') {
-    //         BackAndroid.removeEventListener('hardwareBackPress', this.onBackAndroid);
-    //     }
-    // }
-    // onBackAndroid = () => {
-    //     const nav = this.navigator;
-    //     const routers = nav.getCurrentRoutes();
-    //     if (routers.length > 1) {
-
-    //         this.setState({
-    //             is_show: false
-
-    //         })
-    //         return true;
-    //     }
-    //     return false;
-    // };
     render() {
 
         return (
@@ -49,6 +25,7 @@ export default class Loading extends Component {
                 onRequestClose={() => this.onRequestClose()}
             >
                 <View style={styles.loadingBox}>
+
                     <ActivityIndicator animating={this.state.is_show}
                         style={[styles.centering, { height: 80 }]}
                         size="large" />
@@ -69,5 +46,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         padding: 8,
+        
     },
 });
