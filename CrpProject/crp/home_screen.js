@@ -23,6 +23,7 @@ const POINT_ICONS = require('./images/tabs/point_icons.png');
 import WebviewDetail from './webdetail';
 import NetUitl from './netUitl';
 import NoticeActivity from './notice_list'
+import LawActivity from './law_rule'
 export default class TopScreen extends Component {
     constructor(props) {
         super(props);
@@ -309,6 +310,15 @@ export default class TopScreen extends Component {
         })
 
     }
+    // 跳转到法规列表
+    _goLawActivity = () => {
+        this.props.navigator.push({
+            component: LawActivity,
+            params: {
+            }
+        })
+
+    }
     _separator = () => {
         return <View style={{ height: 1, backgroundColor: '#e2e2e2' }} />;
     }
@@ -338,11 +348,13 @@ export default class TopScreen extends Component {
                             <Text style={styles.rule_left_txt}>国内法规</Text>
 
                         </View>
-                        <View style={styles.rule_right}>
-                            <Text style={styles.rule_right_txt}>更多</Text>
-                            <Image style={styles.rule_right_img} source={RIGHT_ICONS} />
-                        </View>
 
+                        <TouchableNativeFeedback onPress={this._goLawActivity}>
+                            <View style={styles.rule_right}>
+                                <Text style={styles.rule_right_txt}>更多</Text>
+                                <Image style={styles.rule_right_img} source={RIGHT_ICONS} />
+                            </View>
+                        </TouchableNativeFeedback>
                     </View>
                     <Image source={RULE_BG} style={{ height: 100 }} />
                     <View style={{ height: 185 }}>

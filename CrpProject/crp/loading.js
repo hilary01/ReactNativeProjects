@@ -17,6 +17,10 @@ export default class Loading extends Component {
         }
 
     }
+    onRequestClose() {
+
+
+    }
     render() {
 
         return (
@@ -46,6 +50,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
         padding: 8,
-        
+
     },
 });

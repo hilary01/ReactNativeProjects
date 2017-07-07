@@ -13,7 +13,8 @@ import {
     ListView,
     TouchableOpacity
 } from 'react-native';
-
+var Dimensions = require('Dimensions');
+var ScreenWidth = Dimensions.get('window').width;
 //根据需要引入
 import {
     SwRefreshListView, //支持下拉刷新和上拉加载的ListView
@@ -22,7 +23,7 @@ import {
 } from 'react-native-swRefresh'
 const SEARCH_ICON = require('./images/tabs/search_icon.png');
 var BACK_ICON = require('./images/tabs/nav_return.png');
-var SEARCH_URL = 'http://drmlum.rdgchina.com/drmapp/news/noticelist';
+var SEARCH_URL = 'http://drmlum.rdgchina.com/drmapp/news/statutelist';
 var searchList;
 import LoadView from './loading'
 import NetUitl from './netUitl'
@@ -31,20 +32,19 @@ var TYPE_ICON = require('./images/tabs/type_icon.png');
 var TIME_ICON = require('./images/tabs/type_time.png');
 var pageNum = 1;
 var totalPage = 0;
-var typeId = '1';
-var menuName = ['摄影', '口述', '音乐', '戏剧', '曲艺', '舞蹈', '杂技', '美术', '文字', '电影', '建筑', '模型', '摄制作品', '地图', '设计图', '其他'];
-var menuId = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16'];
+var typeId = '1';//默认1国际法规2国内法规
 import PublicTitle from './public_title';
+
 var toplist = new Array();
-export default class NoticeActivity extends Component {
+export default class LawRuleActivity extends Component {
     constructor(props) {
         super(props);
         this.state = {
             keyWord: '',
             show: true,
             isLoadMore: false,
+            isSelect: true,
             dataSource: new ListView.DataSource({ rowHasChanged: (row1, row2) => row1 !== row2 }),
-            topList: {}
 
 
         };
@@ -57,39 +57,15 @@ export default class NoticeActivity extends Component {
             clearTimeout(timer)
             this.refs.listView.beginRefresh()
         }, 500) //自动调用开始刷新 新增方法
-        this.initTopMenu();
         this.getData(typeId);
 
 
 
     }
 
-    initTopMenu() {
-
-
-        for (var i = 0; i < menuName.length; i++) {
-            var menu = new Object();
-            menu.id = menuId[i];
-            menu.name = menuName[i];
-            if (i == 0) {
-
-                menu.select = true;
-            } else {
-                menu.select = false;
-
-            }
-            toplist.push(menu);
-
-        }
-        this.setState({
-            topList: toplist,
-
-        })
-
-
-    }
 
     getData(typeid) {
+        console.log(typeid);
         StringBufferUtils.init();
         StringBufferUtils.append('typeid=' + typeid);
         StringBufferUtils.append('&&pageNo=' + pageNum);
@@ -197,59 +173,17 @@ export default class NoticeActivity extends Component {
     }
     // 返回国内法规Item
     _renderSearchItem = (itemData, index) => {
-        var types = this._getType(itemData.category);
         return (
-            <View style={{ height: 110, justifyContent: 'center', marginTop: 10, backgroundColor: 'white' }}>
+            <View style={{ height: 60, justifyContent: 'center', marginTop: 1, backgroundColor: 'white' }}>
                 <TouchableNativeFeedback onPress={() => this.clickItem(itemData, index)}>
-                    <View style={{ height: 110, flexDirection: 'column', justifyContent: 'center' }}>
-                        <Text style={styles.rule_item_title} numberOfLines={2}>{itemData.name}</Text>
-                        <Text style={styles.rule_item_time}>{itemData.certificatenumber}</Text>
-                        <Text style={styles.rule_item_time}>{itemData.realname}</Text>
-                        <View style={{ height: 1, backgroundColor: '#e2e2e2', marginTop: 5 }}></View>
-                        <View style={{ height: 40, flexDirection: 'row', marginTop: 5, flex: 1 }}>
-                            <View style={{ width: 140, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
-
-                                <Image style={{ width: 16, height: 16, marginLeft: 20 }} source={TYPE_ICON} />
-                                <Text style={{ textAlign: 'center', color: '#999999', fontSize: 13, marginLeft: 5 }}>{types}</Text>
-                            </View>
-                            <View style={{ width: 140, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-
-                                <Image style={{ width: 16, height: 16 }} source={TIME_ICON} />
-                                <Text style={{ textAlign: 'center', color: '#999999', fontSize: 13, marginLeft: 5, marginRight: 10 }}>{itemData.djdatetime}</Text>
-                            </View>
-
-                        </View>
+                    <View style={{ height: 60, flexDirection: 'column', justifyContent: 'center' }}>
+                        <Text style={styles.rule_item_title} numberOfLines={2}>{itemData.title}</Text>
+                        <Text style={styles.rule_item_time}>{itemData.publishtime}</Text>
 
                     </View>
                 </TouchableNativeFeedback>
             </View>
         );
-    }
-    _renderTopItem = (itemData, index) => {
-        return <TouchableOpacity key={index} activeOpacity={1} onPress={() => this.selectMenu(itemData, index)}>
-
-            {this.selectIcon(itemData.item.select, itemData.item.name)}
-        </TouchableOpacity >
-
-    }
-    selectIcon(select, name) {
-        if (select) {
-
-            return <View style={{ flexDirection: 'column' }}>
-
-                <Text style={[{ height: 48, width: 60 }, styles.top_select_name]}>{name}</Text>
-                <View style={{ height: 2, width: 60, backgroundColor: '#ff9602' }} />
-            </View>
-        } else {
-            return <View style={{ flexDirection: 'column' }}>
-
-                <Text style={[{ height: 48, width: 60 }, styles.top_name]}>{name}</Text>
-                <View style={{ height: 2, width: 60, backgroundColor: '#ffffff' }} />
-            </View>
-
-        }
-
-
     }
     _separator = () => {
         return <View style={{ height: 1, backgroundColor: '#e2e2e2' }} />;
@@ -269,34 +203,81 @@ export default class NoticeActivity extends Component {
     }
 
     // 选中类型
-    selectMenu(itemData, index) {
-        this.changeMenu(itemData);
+    selectMenu(flag) {
+
+        switch (flag) {
+            case '1':
+                this.changeSelectData('1', true);
+                break;
+            case '2':
+                this.changeSelectData('2', false);
+                break;
+
+        }
+
+    }
+    //更改数据
+    changeSelectData(type, flag) {
+        var is_select = true;
+        typeId = type;
+        is_select = flag;
+        pageNum = 1;
+        this._data = [];
+        this.setState({
+
+            show: true,
+            isSelect: is_select
+        })
+        this.getData(typeId);
     }
     changeMenu(itemData) {
-
-        var menuList = this.state.topList;
-        var list = new Array();
-        for (var i = 0; i < menuList.length; i++) {
-            var menus = menuList[i];
-            if (itemData.index == i) {
-
-                menus.select = true;
-
-            } else {
-                menus.select = false;
-
-            }
-            list.push(menus);
-        }
         menuId = itemData.item.id;
         pageNum = 1;
         this.setState({
 
             show: true,
-            topList: list,
         })
         this._data = [];
         this.getData(menuId);
+
+    }
+    _topTab = () => {
+
+        return <View style={{ height: 50, backgroundColor: 'white', flexDirection: 'row', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+
+            <TouchableOpacity activeOpacity={1} onPress={() => this.selectMenu('1')}>
+
+
+                <View style={{ flexDirection: 'row', alignItems: 'center', width: ScreenWidth / 2 - 20, marginRight: 10, marginLeft: 10 }}>
+                    <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        {this.state.isSelect == true ? (<Text style={[{ height: 48, textAlign: 'center', width: ScreenWidth / 2 - 20 }, styles.top_select_name]}>国内法规</Text>
+                        )
+                            : (<Text style={[{ height: 48, textAlign: 'center', width: ScreenWidth / 2 - 20 }, styles.top_name]}>国内法规</Text>)}
+                        {this.state.isSelect == true ? (<View style={{ height: 2, backgroundColor: '#ff9602', width: ScreenWidth / 2 - 100 }} />
+                        )
+                            : (<View style={{ height: 2, backgroundColor: '#ffffff', width: ScreenWidth / 2 - 100 }} />)}
+
+                    </View>
+                </View>
+
+            </TouchableOpacity >
+            <TouchableOpacity activeOpacity={1} onPress={() => this.selectMenu('2')}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', width: ScreenWidth / 2 - 20, marginLeft: 10, marginRight: 10 }}>
+                    <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        {this.state.isSelect == true ? (<Text style={[{ height: 48, textAlign: 'center', width: ScreenWidth / 2 - 20 }, styles.top_name]}>国际法规</Text>
+                        )
+                            : (<Text style={[{ height: 48, textAlign: 'center', width: ScreenWidth / 2 - 20 }, styles.top_select_name]}>国际法规</Text>)}
+
+                        {this.state.isSelect == true ? (<View style={{ height: 2, backgroundColor: '#ffffff', width: ScreenWidth / 2 - 100 }} />
+                        )
+                            : (<View style={{ height: 2, backgroundColor: '#ff9602', width: ScreenWidth / 2 - 100 }} />)}
+                    </View>
+                </View>
+            </TouchableOpacity >
+
+        </View >
+
+
 
     }
     //此函数用于为给定的item生成一个不重复的key
@@ -313,16 +294,10 @@ export default class NoticeActivity extends Component {
                     barStyle={'default'}
                     networkActivityIndicatorVisible={true}
                 />
-                <PublicTitle text='登记公告' _backOnclick={this._backOnclick.bind(this)} left_icon={BACK_ICON} />
-                <View style={{ height: 50, backgroundColor: 'white' }}>
+                <PublicTitle text='相关法规' _backOnclick={this._backOnclick.bind(this)} left_icon={BACK_ICON} />
+                <View style={{ height: 50, flexDirection: 'row' }}>
 
-                    <FlatList
-                        ref={(flatList) => this._flatList = flatList}
-                        renderItem={this._renderTopItem}
-                        horizontal={true}
-                        keyExtractor={this._keyExtractor}
-                        data={this.state.topList}>
-                    </FlatList>
+                    {this._topTab()}
 
                 </View>
                 <SwRefreshListView
@@ -348,74 +323,6 @@ export default class NoticeActivity extends Component {
 
     }
 
-    /**
-        * 返回类型
-        * @param {*} typeStr 
-        */
-    _getType(typeStr) {
-        var typeTitle = '';
-
-        if (null != typeStr && typeStr != '') {
-            switch (parseInt(typeStr)) {
-                case 1:
-                    typeTitle = "摄影";
-                    break;
-                case 2:
-                    typeTitle = "口述";
-                    break;
-                case 3:
-                    typeTitle = "音乐";
-                    break;
-                case 4:
-                    typeTitle = "戏剧";
-                    break;
-                case 5:
-                    typeTitle = "曲艺";
-                    break;
-                case 6:
-                    typeTitle = "舞蹈";
-                    break;
-                case 7:
-                    typeTitle = "杂技";
-                    break;
-                case 8:
-                    typeTitle = "美术";
-                    break;
-                case 9:
-                    typeTitle = "文字";
-                    break;
-                case 10:
-                    typeTitle = "电影";
-                    break;
-                case 11:
-                    typeTitle = "建筑";
-                    break;
-                case 12:
-                    typeTitle = "模型";
-                    break;
-                case 13:
-                    typeTitle = "摄制作品";
-                    break;
-                case 14:
-                    typeTitle = "地图";
-                    break;
-                case 15:
-                    typeTitle = "设计图";
-                    break;
-                case 16:
-                    typeTitle = "其他";
-                    break;
-
-            }
-
-
-        }
-
-
-        return typeTitle;
-
-
-    }
 }
 const styles = StyleSheet.create({
 
