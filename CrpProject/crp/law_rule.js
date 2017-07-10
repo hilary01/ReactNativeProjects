@@ -34,7 +34,7 @@ var pageNum = 1;
 var totalPage = 0;
 var typeId = '1';//默认1国际法规2国内法规
 import PublicTitle from './public_title';
-
+import WebviewDetail from './webdetail';
 var toplist = new Array();
 export default class LawRuleActivity extends Component {
     constructor(props) {
@@ -105,10 +105,16 @@ export default class LawRuleActivity extends Component {
         NetUitl.post(SEARCH_URL, param, '', function (set) {
 
             //下面的就是请求来的数据
-            if (null != set && 'undefind' != set && '' != set.totalPage) {
+
+            if (null != set && 'undefind' != set && '' != set.totalPage && set.return_code == '0') {
                 totalPage = set.totalPage;
                 that.addItemKey(set.result);
                 pageNum++;
+            } else {
+                that.setState({
+                    show: false
+                });
+
             }
 
 
@@ -199,7 +205,13 @@ export default class LawRuleActivity extends Component {
     }
     //点击列表点击每一行
     clickItem(item, index) {
-        ToastAndroid.show('抱歉由于版权局权限原因，暂不支持点击', ToastAndroid.SHORT);
+        this.props.navigator.push({
+            component: WebviewDetail,
+            params: {
+                root_url: item.tourl,
+                title: item.title,
+            }
+        })
     }
 
     // 选中类型
@@ -301,19 +313,20 @@ export default class LawRuleActivity extends Component {
 
                 </View>
                 <SwRefreshListView
+                    style={{ marginTop: 10 }}
                     dataSource={this.state.dataSource}
                     ref="listView"
                     renderRow={this._renderSearchItem}
                     onRefresh={this._onListRefersh.bind(this)}//设置下拉刷新的方法 传递参数end函数 当刷新操作结束时 */
                     onLoadMore={this._onLoadMore.bind(this)} //设置上拉加载执行的方法 传递参数end函数 
                     isShowLoadMore={this.state.isLoadMore}
-                //可以通过state控制是否显示上拉加载组件，可用于数据不足一屏或者要求数据全部加载完毕时不显示上拉加载控件
+                    //可以通过state控制是否显示上拉加载组件，可用于数据不足一屏或者要求数据全部加载完毕时不显示上拉加载控件
 
-                /*customRefreshView={(refresStatus, offsetY) => {
-                    return (<Text>{'状态:' + refresStatus + ',' + offsetY}</Text>)
-                }} 
+                    customRefreshView={(refresStatus, offsetY) => {
+                        return null;
+                    }}
 
-                customRefreshViewHeight={100} //自定义刷新视图时必须指定高度*/
+                    customRefreshViewHeight={0} //自定义刷新视图时必须指定高度*/
 
                 />
             </View>
@@ -352,7 +365,7 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         justifyContent: 'flex-start',
         paddingLeft: 20,
-        fontSize: 14,
+        fontSize: 13,
         color: '#000000',
         marginTop: 5
     }, rule_item_time: {

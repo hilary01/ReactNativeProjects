@@ -10,9 +10,11 @@ import {
     StatusBar,
     ScrollView,
     ToastAndroid,
-    ListView
+    ListView,
+    TouchableOpacity
 } from 'react-native';
-
+var Dimensions = require('Dimensions');
+var ScreenWidth = Dimensions.get('window').width;
 //根据需要引入
 import {
     SwRefreshListView, //支持下拉刷新和上拉加载的ListView
@@ -21,7 +23,7 @@ import {
 } from 'react-native-swRefresh'
 const SEARCH_ICON = require('./images/tabs/search_icon.png');
 var BACK_ICON = require('./images/tabs/nav_return.png');
-var SEARCH_URL = 'http://drmlum.rdgchina.com/drmapp/copyright/search';
+var SEARCH_URL = 'http://drmlum.rdgchina.com/drmapp/news/newslist';
 var searchList;
 import LoadView from './loading'
 import NetUitl from './netUitl'
@@ -30,14 +32,19 @@ var TYPE_ICON = require('./images/tabs/type_icon.png');
 var TIME_ICON = require('./images/tabs/type_time.png');
 var pageNum = 1;
 var totalPage = 0;
-export default class SearchActivity extends Component {
+var typeId = '1';//默认1国际法规2国内法规
+import PublicTitle from './public_title';
+import WebviewDetail from './webdetail';
+var toplist = new Array();
+export default class LawRuleActivity extends Component {
     constructor(props) {
         super(props);
         this.state = {
             keyWord: '',
             show: true,
             isLoadMore: false,
-            dataSource: new ListView.DataSource({ rowHasChanged: (row1, row2) => row1 !== row2 })
+            isSelect: true,
+            dataSource: new ListView.DataSource({ rowHasChanged: (row1, row2) => row1 !== row2 }),
 
 
         };
@@ -46,20 +53,21 @@ export default class SearchActivity extends Component {
     }
 
     componentDidMount() {
-
-        this.setState({
-            keyWord: this.props.keyword
-
-        })
-        this.getData(this.props.keyword);
+        let timer = setTimeout(() => {
+            clearTimeout(timer)
+            this.refs.listView.beginRefresh()
+        }, 500) //自动调用开始刷新 新增方法
+        this.getData(typeId);
 
 
 
     }
 
-    getData(keyWord) {
+
+    getData(typeid) {
+        console.log(typeid);
         StringBufferUtils.init();
-        StringBufferUtils.append('title=' + keyWord);
+        StringBufferUtils.append('typeid=' + typeid);
         StringBufferUtils.append('&&pageNo=' + pageNum);
         StringBufferUtils.append('&&recordsperpage=' + 10);
         let params = StringBufferUtils.toString();
@@ -102,10 +110,10 @@ export default class SearchActivity extends Component {
                 that.addItemKey(set.result);
                 pageNum++;
             } else {
+
                 that.setState({
                     show: false
                 });
-
             }
 
 
@@ -152,10 +160,8 @@ export default class SearchActivity extends Component {
         let timer = setTimeout(() => {
 
             clearTimeout(timer)
-
-
-            // end()//刷新成功后需要调用end结束刷新 不管成功或者失败都应该结束
-        }, 1500)
+            end()//刷新成功后需要调用end结束刷新 不管成功或者失败都应该结束
+        }, 500)
     }
 
 
@@ -164,7 +170,7 @@ export default class SearchActivity extends Component {
      * @param {*下拉加载更多} end 
      */
     _onLoadMore(end) {
-        this.getData(this.props.keyword);
+        this.getData(typeId);
         let isNoMore = pageNum > parseInt(totalPage); //是否已无更多数据
         end(isNoMore)// 假设加载4页后数据全部加载完毕 加载成功后需要调用end结束刷新  
 
@@ -172,26 +178,15 @@ export default class SearchActivity extends Component {
     }
     // 返回国内法规Item
     _renderSearchItem = (itemData, index) => {
-        var types = this._getType(itemData.category);
         return (
-            <View style={{ height: 100, justifyContent: 'center', marginTop: 10 }}>
+            <View style={{ height: 100, justifyContent: 'center', marginTop: 1, backgroundColor: 'white' }}>
                 <TouchableNativeFeedback onPress={() => this.clickItem(itemData, index)}>
-                    <View style={{ height: 100, flexDirection: 'column', justifyContent: 'center' }}>
-                        <Text style={styles.rule_item_title}>{itemData.name}</Text>
-                        <Text style={styles.rule_item_time}>{itemData.certificatenumber}</Text>
-                        <Text style={styles.rule_item_time}>{itemData.realname}</Text>
-                        <View style={{ height: 1, backgroundColor: '#e2e2e2', marginTop: 5 }}></View>
-                        <View style={{ height: 40, flexDirection: 'row', marginTop: 5, flex: 1 }}>
-                            <View style={{ width: 140, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start' }}>
-
-                                <Image style={{ width: 16, height: 16, marginLeft: 20 }} source={TYPE_ICON} />
-                                <Text style={{ textAlign: 'center', color: '#999999', fontSize: 13, marginLeft: 5 }}>{types}</Text>
-                            </View>
-                            <View style={{ width: 140, flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-
-                                <Image style={{ width: 16, height: 16 }} source={TIME_ICON} />
-                                <Text style={{ textAlign: 'center', color: '#999999', fontSize: 13, marginLeft: 5, marginRight: 10 }}>{itemData.djdatetime}</Text>
-                            </View>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <Image style={{ height: 80, width: 80 }} source={itemData.thumbpath}></Image>
+                        <View style={{ height: 100, flexDirection: 'column', justifyContent: 'center' }}>
+                            <Text style={styles.news_item_title} numberOfLines={2}>{itemData.title}</Text>
+                            <Text style={styles.rule_item_time}>{itemData.publishtime}</Text>
+                            <Text style={styles.rule_item_title} numberOfLines={2}>{itemData.content}</Text>
 
                         </View>
 
@@ -203,12 +198,7 @@ export default class SearchActivity extends Component {
     _separator = () => {
         return <View style={{ height: 1, backgroundColor: '#e2e2e2' }} />;
     }
-    _goSearchResult() {
 
-        pageNum = 1;
-        this.getData(this.state.keyWord);
-
-    }
     _backOnclick() {
         this.props.navigator.pop(
             {
@@ -219,8 +209,95 @@ export default class SearchActivity extends Component {
     }
     //点击列表点击每一行
     clickItem(item, index) {
-        ToastAndroid.show('抱歉由于版权局权限原因，暂不支持点击', ToastAndroid.SHORT);
+        this.props.navigator.push({
+            component: WebviewDetail,
+            params: {
+                root_url: item.tourl,
+                title: item.title,
+            }
+        })
     }
+
+    // 选中类型
+    selectMenu(flag) {
+
+        switch (flag) {
+            case '1':
+                this.changeSelectData('1', true);
+                break;
+            case '2':
+                this.changeSelectData('2', false);
+                break;
+
+        }
+
+    }
+    //更改数据
+    changeSelectData(type, flag) {
+        var is_select = true;
+        typeId = type;
+        is_select = flag;
+        pageNum = 1;
+        this._data = [];
+        this.setState({
+
+            show: true,
+            isSelect: is_select
+        })
+        this.getData(typeId);
+    }
+    changeMenu(itemData) {
+        menuId = itemData.item.id;
+        pageNum = 1;
+        this.setState({
+
+            show: true,
+        })
+        this._data = [];
+        this.getData(menuId);
+
+    }
+    _topTab = () => {
+
+        return <View style={{ height: 50, backgroundColor: 'white', flexDirection: 'row', flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+
+            <TouchableOpacity activeOpacity={1} onPress={() => this.selectMenu('1')}>
+
+
+                <View style={{ flexDirection: 'row', alignItems: 'center', width: ScreenWidth / 2 - 20, marginRight: 10, marginLeft: 10 }}>
+                    <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        {this.state.isSelect == true ? (<Text style={[{ height: 48, textAlign: 'center', width: ScreenWidth / 2 - 20 }, styles.top_select_name]}>省内资讯</Text>
+                        )
+                            : (<Text style={[{ height: 48, textAlign: 'center', width: ScreenWidth / 2 - 20 }, styles.top_name]}>省内资讯</Text>)}
+                        {this.state.isSelect == true ? (<View style={{ height: 2, backgroundColor: '#ff9602', width: ScreenWidth / 2 - 100 }} />
+                        )
+                            : (<View style={{ height: 2, backgroundColor: '#ffffff', width: ScreenWidth / 2 - 100 }} />)}
+
+                    </View>
+                </View>
+
+            </TouchableOpacity >
+            <TouchableOpacity activeOpacity={1} onPress={() => this.selectMenu('2')}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', width: ScreenWidth / 2 - 20, marginLeft: 10, marginRight: 10 }}>
+                    <View style={{ flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        {this.state.isSelect == true ? (<Text style={[{ height: 48, textAlign: 'center', width: ScreenWidth / 2 - 20 }, styles.top_name]}>国内资讯</Text>
+                        )
+                            : (<Text style={[{ height: 48, textAlign: 'center', width: ScreenWidth / 2 - 20 }, styles.top_select_name]}>国内资讯</Text>)}
+
+                        {this.state.isSelect == true ? (<View style={{ height: 2, backgroundColor: '#ffffff', width: ScreenWidth / 2 - 100 }} />
+                        )
+                            : (<View style={{ height: 2, backgroundColor: '#ff9602', width: ScreenWidth / 2 - 100 }} />)}
+                    </View>
+                </View>
+            </TouchableOpacity >
+
+        </View >
+
+
+
+    }
+    //此函数用于为给定的item生成一个不重复的key
+    _keyExtractor = (item, index) => item.key;
     render() {
         return (
 
@@ -233,30 +310,14 @@ export default class SearchActivity extends Component {
                     barStyle={'default'}
                     networkActivityIndicatorVisible={true}
                 />
-                {/*搜索头部控件*/}
-                <View style={styles.top_layout}>
-                    <View style={styles.left_view} >
+                <PublicTitle text='相关法规' _backOnclick={this._backOnclick.bind(this)} left_icon={BACK_ICON} />
+                <View style={{ height: 50, flexDirection: 'row' }}>
 
-                        <TouchableNativeFeedback onPress={() => this._backOnclick()} >
-                            <Image style={styles.left_icon} source={BACK_ICON}></Image>
-                        </TouchableNativeFeedback>
-                    </View>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', height: 45, flex: 1 }}>
-
-                        <TextInput style={{
-                            flex: 1, height: 36, backgroundColor: '#cde8fb', paddingLeft: 35, marginLeft: 5,
-                            borderRadius: 5, marginRight: 10
-                        }} onChangeText={(keyWord) => this.setState({ keyWord })}
-                            value={this.state.keyWord} placeholderTextColor='#999999' returnKeyType='search'
-                            underlineColorAndroid='transparent' placeholder='搜索作品名、著作权人' onSubmitEditing={() => { this._goSearchResult() }}>
-                        </TextInput>
-                        <Image style={{ width: 20, height: 20, marginLeft: 15, position: 'absolute' }} source={SEARCH_ICON} />
-
-                    </View>
-
+                    {this._topTab()}
 
                 </View>
                 <SwRefreshListView
+                    style={{ marginTop: 10 }}
                     dataSource={this.state.dataSource}
                     ref="listView"
                     renderRow={this._renderSearchItem}
@@ -265,11 +326,13 @@ export default class SearchActivity extends Component {
                     isShowLoadMore={this.state.isLoadMore}
                     //可以通过state控制是否显示上拉加载组件，可用于数据不足一屏或者要求数据全部加载完毕时不显示上拉加载控件
 
+
                     customRefreshView={(refresStatus, offsetY) => {
                         return null;
                     }}
 
                     customRefreshViewHeight={0} //自定义刷新视图时必须指定高度*/
+
                 />
             </View>
 
@@ -278,74 +341,6 @@ export default class SearchActivity extends Component {
 
     }
 
-    /**
-        * 返回类型
-        * @param {*} typeStr 
-        */
-    _getType(typeStr) {
-        var typeTitle = '';
-
-        if (null != typeStr && typeStr != '') {
-            switch (parseInt(typeStr)) {
-                case 1:
-                    typeTitle = "摄影";
-                    break;
-                case 2:
-                    typeTitle = "口述";
-                    break;
-                case 3:
-                    typeTitle = "音乐";
-                    break;
-                case 4:
-                    typeTitle = "戏剧";
-                    break;
-                case 5:
-                    typeTitle = "曲艺";
-                    break;
-                case 6:
-                    typeTitle = "舞蹈";
-                    break;
-                case 7:
-                    typeTitle = "杂技";
-                    break;
-                case 8:
-                    typeTitle = "美术";
-                    break;
-                case 9:
-                    typeTitle = "文字";
-                    break;
-                case 10:
-                    typeTitle = "电影";
-                    break;
-                case 11:
-                    typeTitle = "建筑";
-                    break;
-                case 12:
-                    typeTitle = "模型";
-                    break;
-                case 13:
-                    typeTitle = "摄制作品";
-                    break;
-                case 14:
-                    typeTitle = "地图";
-                    break;
-                case 15:
-                    typeTitle = "设计图";
-                    break;
-                case 16:
-                    typeTitle = "其他";
-                    break;
-
-            }
-
-
-        }
-
-
-        return typeTitle;
-
-
-    }
 }
 const styles = StyleSheet.create({
 
@@ -375,7 +370,7 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         justifyContent: 'flex-start',
         paddingLeft: 20,
-        fontSize: 14,
+        fontSize: 13,
         color: '#000000',
         marginTop: 5
     }, rule_item_time: {
@@ -385,5 +380,23 @@ const styles = StyleSheet.create({
         fontSize: 12,
         color: '#999999',
         marginTop: 2
+    },
+    top_name: {
+        textAlign: 'center',
+        textAlignVertical: 'center',
+        color: '#000000',
+        fontSize: 14,
+    }, top_select_name: {
+        textAlign: 'center',
+        textAlignVertical: 'center',
+        color: '#ff9602',
+        fontSize: 14,
+    }, news_item_title: {
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
+        paddingLeft: 20,
+        fontSize: 15,
+        color: '#000000',
+        marginTop: 5
     },
 });

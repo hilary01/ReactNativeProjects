@@ -129,10 +129,15 @@ export default class NoticeActivity extends Component {
         NetUitl.post(SEARCH_URL, param, '', function (set) {
 
             //下面的就是请求来的数据
-            if (null != set && 'undefind' != set && '' != set.totalPage) {
+            if (null != set && 'undefind' != set && '' != set.totalPage && set.return_code == '0') {
                 totalPage = set.totalPage;
                 that.addItemKey(set.result);
                 pageNum++;
+            } else {
+                that.setState({
+                    show: false
+                });
+
             }
 
 

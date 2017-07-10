@@ -16,6 +16,9 @@ const COPYRIGHT_ICON = require('./images/tabs/icon_copyright.png');
 const CER_ICON = require('./images/tabs/icon_cerfity.png');
 const SETTING_ICON = require('./images/tabs/icon_setup.png');
 const ICON_MORE = require('./images/tabs/icon_more.png');
+import LoginActivity from './login'
+import Global from './global'
+import MyCopyright from './mycopyright'
 export default class MyContact extends Component {
 
     // 构造
@@ -23,7 +26,55 @@ export default class MyContact extends Component {
         super(props);
 
     }
-    _onclickBtn=()=>{
+    _onclickBtn(flag) {
+
+        switch (flag) {
+            case '1':
+                if (this.checkLogin()) {
+
+                    this.props.navigator.push({
+                        component: MyCopyright,
+                        params: {
+                        }
+                    })
+                } else {
+                    this.props.navigator.push({
+                        component: LoginActivity,
+                        params: {
+                        }
+
+                    })
+                }
+                break;
+            case '2':
+                break;
+
+        }
+    }
+
+    checkLogin() {
+        var is_login = false;
+        if (Global.isLogin) {
+
+            is_login = true;
+
+        } else {
+            is_login = false;
+
+        }
+
+
+
+    }
+    fillName() {
+        if (Global.isLogin) {
+
+            return <Text style={{ fontSize: 15, color: '#ffffff' }}>{Global.userName}</Text>
+
+        } else {
+            return <Text style={{ fontSize: 15, color: '#ffffff' }}>登录/注册</Text>
+
+        }
 
 
     }
@@ -46,7 +97,9 @@ export default class MyContact extends Component {
 
                         <View style={styles.header_view}>
                             <Image style={styles.head_icon} source={DEFAULT_ICON} />
-                            <Text style={{ fontSize: 15, color: '#ffffff' }}>taozi</Text>
+
+                            {this.fillName()}
+
 
                         </View>
 
@@ -60,8 +113,8 @@ export default class MyContact extends Component {
                 {/*我的版权*/}
                 <View style={{ flexDirection: 'row', height: 48, marginTop: 10, backgroundColor: '#ffffff', alignItems: 'center' }}>
 
-                    <TouchableNativeFeedback onPress={this._onclickBtn}>
-                        <View style={{ flexDirection: 'row',alignItems:'center' }} >
+                    <TouchableNativeFeedback onPress={() => this._onclickBtn('1')}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }} >
                             <View style={{ flexDirection: 'row', justifyContent: 'flex-start', width: 160, alignItems: 'center', marginLeft: 10, flex: 1, height: 48 }}>
 
                                 <Image source={COPYRIGHT_ICON} style={{ width: 20, height: 19 }} />
@@ -77,7 +130,7 @@ export default class MyContact extends Component {
                 <View style={{ flexDirection: 'row', height: 48, marginTop: 1, backgroundColor: '#ffffff', alignItems: 'center' }}>
 
                     <TouchableNativeFeedback >
-                        <View style={{ flexDirection: 'row',alignItems:'center' }} >
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }} >
                             <View style={{ flexDirection: 'row', justifyContent: 'flex-start', width: 160, alignItems: 'center', marginLeft: 10, flex: 1, height: 48 }}>
 
                                 <Image source={CER_ICON} style={{ width: 20, height: 19 }} />
@@ -93,7 +146,7 @@ export default class MyContact extends Component {
                 <View style={{ flexDirection: 'row', height: 48, marginTop: 10, backgroundColor: '#ffffff', alignItems: 'center' }}>
 
                     <TouchableNativeFeedback>
-                        <View style={{ flexDirection: 'row' ,alignItems:'center'}} >
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }} >
 
                             <View style={{ flexDirection: 'row', justifyContent: 'flex-start', width: 160, alignItems: 'center', marginLeft: 10, flex: 1, height: 48 }}>
 

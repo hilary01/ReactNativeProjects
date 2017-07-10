@@ -24,6 +24,7 @@ import WebviewDetail from './webdetail';
 import NetUitl from './netUitl';
 import NoticeActivity from './notice_list'
 import LawActivity from './law_rule'
+import NewsActivity from './news_list'
 export default class TopScreen extends Component {
     constructor(props) {
         super(props);
@@ -48,10 +49,18 @@ export default class TopScreen extends Component {
         var that = this;
         NetUitl.post(url, '', '', function (responseData) {
             //下面的就是请求来的数据
-            that.setState({
-                dataSource: that.state.dataSource.cloneWithPages(responseData.adlist),
-            });
-            that.addItemKey(responseData.statutelist, responseData.newslist, responseData.noticelist)
+            if (null != responseData && 'undefind' != responseData && responseData.return_code == '0') {
+                that.setState({
+                    dataSource: that.state.dataSource.cloneWithPages(responseData.adlist),
+                });
+                that.addItemKey(responseData.statutelist, responseData.newslist, responseData.noticelist)
+
+            } else {
+                that.setState({
+                    show: false
+                });
+
+            }
         })
     }
 
@@ -319,6 +328,16 @@ export default class TopScreen extends Component {
         })
 
     }
+
+    // 跳转到资讯列表
+    _goNewsActivity = () => {
+        this.props.navigator.push({
+            component: NewsActivity,
+            params: {
+            }
+        })
+
+    }
     _separator = () => {
         return <View style={{ height: 1, backgroundColor: '#e2e2e2' }} />;
     }
@@ -345,7 +364,7 @@ export default class TopScreen extends Component {
                         <View style={styles.rule_left}>
 
                             <Image style={styles.rule_left_img} source={RULE_ICONS}></Image>
-                            <Text style={styles.rule_left_txt}>国内法规</Text>
+                            <Text style={styles.rule_left_txt}>相关法规</Text>
 
                         </View>
 
@@ -381,10 +400,12 @@ export default class TopScreen extends Component {
                             <Text style={styles.rule_left_txt}>版权资讯</Text>
 
                         </View>
-                        <View style={styles.rule_right}>
-                            <Text style={styles.rule_right_txt}>更多</Text>
-                            <Image style={styles.rule_right_img} source={RIGHT_ICONS} />
-                        </View>
+                        <TouchableNativeFeedback onPress={this._goNewsActivity}>
+                            <View style={styles.rule_right}>
+                                <Text style={styles.rule_right_txt}>更多</Text>
+                                <Image style={styles.rule_right_img} source={RIGHT_ICONS} />
+                            </View>
+                        </TouchableNativeFeedback>
 
                     </View>
 

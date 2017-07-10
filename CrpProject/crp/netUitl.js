@@ -5,7 +5,34 @@
  * https://github.com/facebook/react-native
  */
 import React, { Component } from 'react';
+import {
+    ToastAndroid,
+} from 'react-native';
+import NetWorkTool from './network'
+import fetch from './fetch-polyfill';
 export default class NetUitl extends React.Component {
+
+
+    // constructor(props) {
+    //     super(props);
+    // NetWorkTool.checkNetworkState((isConnected) => {
+    //     if (!isConnected) {
+    //         Toast.show(NetWorkTool.NOT_NETWORK);
+    //     }
+    // });
+    // }
+
+    // handleMethod(isConnected) {
+    //     alert((isConnected ? 'online' : 'offline'));
+    // }
+    // componentWillMount() {
+    //     NetWorkTool.removeEventListener(NetWorkTool.TAG_NETWORK_CHANGE, this.handleMethod);
+    // }
+
+    // componentWillUnmount() {
+    //     NetWorkTool.removeEventListener(NetWorkTool.TAG_NETWORK_CHANGE, this.handleMethod);
+    // }
+
     /*
      *  get请求
      *  url:请求地址
@@ -49,10 +76,15 @@ export default class NetUitl extends React.Component {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
             body: params,
+            timeout: 60 * 1000
         })
             .then((response) => response.json())
             .then((responseJSON) => {
                 callback(responseJSON)
+            }).catch((err) => {
+                ToastAndroid.show('服务器异常，请稍后再试！', ToastAndroid.SHORT);
+                callback(err)
+
             }).done();
     }
 
