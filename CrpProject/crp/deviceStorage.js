@@ -1,6 +1,6 @@
 import React, {
     AsyncStorage
-}from 'react-native';
+} from 'react-native';
 
 class DeviceStorage {
     /**
@@ -25,7 +25,7 @@ class DeviceStorage {
      */
     static save(key, value) {
 
-         return AsyncStorage.setItem(key, JSON.stringify(value)).then((value) => {
+        return AsyncStorage.setItem(key, JSON.stringify(value)).then((value) => {
             const jsonValue = JSON.parse(value);
             return value;
         });

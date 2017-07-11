@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { View, Text,StyleSheet } from 'react-native';
-export default class MyCopyrightActivity extends Component {
+export default class ConsumerActivity extends Component {
     constructor(props) {
         super(props);
        
@@ -15,7 +15,7 @@ export default class MyCopyrightActivity extends Component {
         return (
 
                <View>
-               <Text> 我的版权</Text>
+               <Text> 个人资料</Text>
             </View>
 
 

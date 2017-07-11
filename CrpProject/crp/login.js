@@ -8,25 +8,31 @@ import {
     StyleSheet,
     Image,
     TouchableNativeFeedback,
-    StatusBar
+    StatusBar,
+    AsyncStorage
 } from 'react-native';
 const USER_ICON = require('./images/tabs/user_icon.png');
 const PASSWORD_ICON = require('./images/tabs/icon_pass.png');
 const SHOWPASS_ICON = require('./images/tabs/icon_show.png');
+const DISSHOW_ICON = require('./images/tabs/icon_disshow.png');
 const APP_ICON = require('./images/tabs/icon_logo.png');
 const CLOSE_ICON = require('./images/tabs/icon_closes.png');
 var LOGIN_URL = 'http://drmlum.rdgchina.com/drmapp/person/login';
 import StringUtil from './StringUtil';
-import LoadView from './loading'
-import NetUitl from './netUitl'
-import StringBufferUtils from './StringBufferUtil'
+import LoadView from './loading';
+import NetUitl from './netUitl';
+import StringBufferUtils from './StringBufferUtil';
+import DeviceStorage from './deviceStorage';
+import Global from './global';
+import RegistActivity from './regist'
 export default class LoginInput extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            userName: '安卓线上123',
+            userName: '9999',
             password: '123456',
-            show: false
+            show: false,
+            ishow_pass: true,
         }
 
     }
@@ -67,15 +73,23 @@ export default class LoginInput extends Component {
         NetUitl.post(LOGIN_URL, param, '', function (set) {
 
             //下面的就是请求来的数据
-            // var json = JSON.stringify(set);
-            // alert(json);
+            var json = JSON.stringify(set.result);
             if (null != set && null != set.return_code && set.return_code == '0') {
+                that.saveUserInfoData(json);
+                Global.isLogin = true;
+                Global.userName = set.result.username;
+                Global.userIcon = set.result.persion.headimg;
                 that.setState({
 
                     show: false
 
                 })
                 ToastAndroid.show(set.msg, ToastAndroid.SHORT);
+                that.props.navigator.pop(
+                    {
+
+                    }
+                );
             } else {
                 ToastAndroid.show(set.msg, ToastAndroid.SHORT);
                 that.setState({
@@ -87,6 +101,21 @@ export default class LoginInput extends Component {
         })
 
     }
+    //保存用户信息
+    saveUserInfoData(value) {
+        AsyncStorage.removeItem('user_info_key');
+        AsyncStorage.setItem(
+            'user_info_key',
+            value,
+            (error) => {
+                if (error) {
+                    alert('存值失败:', error);
+                } else {
+
+                }
+            }
+        );
+    }
     _pressButton() {
         this.props.navigator.pop(
             {
@@ -96,13 +125,37 @@ export default class LoginInput extends Component {
     }
     //显示密码
     _showPassBtn() {
+        var show = this.state.ishow_pass;
+        var flag;
+        if (show) {
+            flag = false;
 
-        alert('显示密码');
+        } else {
+
+            flag = true;
+        }
+        this.setState({
+
+            ishow_pass: flag,
+
+        })
+
     }
     //忘记密码
     _forgetPassWordBtn() {
 
         alert('忘记密码');
+    }
+    //注册
+    _registdBtn() {
+
+        this.props.navigator.push({
+            component: RegistActivity,
+            params: {
+
+
+            }
+        })
     }
     //关闭
     _closeBtn() {
@@ -153,7 +206,7 @@ export default class LoginInput extends Component {
                         testId={'pass'}>
                         <TextInput
                             style={{ flex: 1, height: 36, backgroundColor: '#f6f6f6', marginLeft: 20, paddingLeft: 35 }}
-                            placeholder='密码' placeholderTextColor='#999999' secureTextEntry={true} maxLength={12}
+                            placeholder='密码' placeholderTextColor='#999999' secureTextEntry={this.state.ishow_pass} maxLength={12}
                             onChangeText={(password) => this.setState({ password })}
                             value={this.state.password}
                         />
@@ -161,7 +214,7 @@ export default class LoginInput extends Component {
                         <TouchableNativeFeedback onPress={() => this._showPassBtn()}>
                             <View style={{ width: 25, height: 25, flexDirection: 'row', justifyContent: 'center', position: 'absolute', marginLeft: 310, alignItems: 'center' }}>
 
-                                <Image style={{ width: 16, height: 16 }} source={SHOWPASS_ICON} />
+                                <Image style={{ width: 16, height: 16 }} source={(this.state.ishow_pass == true) ? (DISSHOW_ICON) : (SHOWPASS_ICON)} />
 
                             </View>
                         </TouchableNativeFeedback>
@@ -173,6 +226,7 @@ export default class LoginInput extends Component {
 
                         <Button title={'登录'} color="#028CE5" onPress={() => this._submitLogin()}
                             style={{ flex: 1, height: 40, textAlign: 'center', lineHeight: 40 }} />
+                        <Text style={{ fontSize: 16, color: '#666666', marginTop: 10, textAlign: 'center', paddingRight: 20 }} onPress={this._registdBtn.bind(this)} >注册账号</Text>
 
                     </View>
 

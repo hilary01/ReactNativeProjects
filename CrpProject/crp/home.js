@@ -18,6 +18,7 @@ import AdverScreen from './home_screen'
 var SEARCH_ICON = require('./images/tabs/icon_search.png');
 import SearchActivity from './search'
 var nav;
+import Global from './global';
 var lastBackTime = "";//记录点击返回键的时间 
 export default class HomeActivity extends Component {
     // 构造
@@ -58,9 +59,13 @@ export default class HomeActivity extends Component {
                     }
                 }
                 if (routes.length === 1) {// 在第一页了,2秒之内点击两次返回键，退出应用  
-                   
-                    if ( (lastBackTime + 2000)>= Date.now()) {
-                         BackHandler.exitApp();
+
+                    if ((lastBackTime + 2000) >= Date.now()) {
+
+                        Global.isLogin = false;
+                        Global.userName = undefined;
+                        Global.userIcon = undefined;
+                        BackHandler.exitApp();
                         return false;
                     }
                     // 此处可以根据情况实现 点2次就退出应用，或者弹出rn视图等  
