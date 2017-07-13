@@ -29,14 +29,37 @@ export default class LoginInput extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            userName: '9999',
-            password: '123456',
+            userName: '',
+            password: '',
             show: false,
             ishow_pass: true,
         }
 
     }
+    componentDidMount() {
 
+        var that = this;
+        AsyncStorage.getItem(
+            'user_name_key',
+            (error, result) => {
+                if (error) {
+                    alert('取值失败:' + error);
+                } else {
+                    const jsonValue = JSON.parse(result);
+                    if (null != jsonValue) {
+                        that.setState({
+                            userName: jsonValue.userName,
+                            password: jsonValue.passWord
+
+
+                        })
+
+                    }
+
+                }
+            }
+        )
+    }
     /**
      * 登录操作
      * @param {*用户名} username 
@@ -47,12 +70,12 @@ export default class LoginInput extends Component {
         var pass_word = this.state.password;
         if (!StringUtil.isNotEmpty(user_name)) {
 
-            ToastAndroid.show('请输入用户名');
+            ToastAndroid.show('请输入用户名', ToastAndroid.SHORT);
             return;
         }
         if (!StringUtil.isNotEmpty(pass_word) || pass_word.length < 6) {
 
-            ToastAndroid.show('请输入6-12位密码');
+            ToastAndroid.show('请输入6-12位密码', ToastAndroid.SHORT);
             return;
         }
         this.setState({

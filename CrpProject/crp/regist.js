@@ -5,12 +5,19 @@ import {
     StyleSheet,
     TextInput,
     ToastAndroid,
-    Button
+    Button,
+    AsyncStorage
 } from 'react-native';
 import PublicTitle from './public_title.js'
-import Global from './global';
+var REGIST_URL = 'http://drmlum.rdgchina.com/drmapp/person/register';
 import StringUtil from './StringUtil';
+import LoadView from './loading';
+import NetUitl from './netUitl';
+import StringBufferUtils from './StringBufferUtil';
+import DeviceStorage from './deviceStorage';
+import Global from './global';
 var BACK_ICON = require('./images/tabs/nav_return.png');
+import BindEmail from './bind_email'
 export default class ApplyActivity extends Component {
     constructor(props) {
         super(props);
@@ -30,11 +37,91 @@ export default class ApplyActivity extends Component {
         );
 
     }
+
     _registdBtn() {
+        var user_name = this.state.userName;
+        var pass_word = this.state.passWord;
+        var ok_pass = this.state.okPassWord;
+        if (!StringUtil.isNotEmpty(user_name)) {
 
-        alert('注册提交');
+            ToastAndroid.show('请输入用户名', ToastAndroid.SHORT);
+            return;
+        }
+        if (!StringUtil.isNotEmpty(pass_word) || pass_word.length < 5) {
+
+            ToastAndroid.show('请输入6-12位密码', ToastAndroid.SHORT);
+            return;
+        }
+        if (pass_word != ok_pass) {
+
+            ToastAndroid.show('两次输入密码不一致', ToastAndroid.SHORT);
+            return;
+        }
+        this.setState({
+
+            show: true
+
+        })
+        StringBufferUtils.init();
+        StringBufferUtils.append('username=' + user_name);
+        StringBufferUtils.append('&&password=' + pass_word);
+        StringBufferUtils.append('&&conpassword=' + ok_pass);
+        let params = StringBufferUtils.toString();
+        this.fetchData(params);
+
+
     }
+    //保存用户信息
+    saveUserNameData(value) {
+        var json = JSON.stringify(value);
 
+        AsyncStorage.removeItem('user_name_key');
+        AsyncStorage.setItem(
+            'user_name_key',
+            json,
+            (error) => {
+                if (error) {
+                    alert('存值失败:', error);
+                } else {
+                }
+            }
+        );
+    }
+    fetchData(param) {
+        //get请求,以百度为例,没有参数,没有header
+        var that = this;
+        NetUitl.post(REGIST_URL, param, '', function (set) {
+
+            //下面的就是请求来的数据
+            if (null != set && null != set.return_code && set.return_code == '0') {
+                var userEntity = new Object();
+                userEntity.userName = that.state.userName;
+                userEntity.passWord = that.state.passWord;
+                Global.userName = that.state.userName;
+                Global.passWord = that.state.passWord;
+                that.saveUserNameData(userEntity);
+                that.setState({
+
+                    show: false
+
+                })
+                that.props.navigator.push({
+                    component: BindEmail,
+                    params: {
+                    }
+                })
+                ToastAndroid.show(set.msg, ToastAndroid.SHORT);
+            } else {
+                ToastAndroid.show(set.msg, ToastAndroid.SHORT);
+                that.setState({
+                    show: false
+                });
+
+            }
+
+        })
+
+    }
     render() {
         return (
 
@@ -70,14 +157,14 @@ export default class ApplyActivity extends Component {
                 <View style={{ marginTop: 30, marginLeft: 10, marginRight: 10 }}>
 
 
-                    <Button title={'登录'} color="#028CE5" onPress={() => this._submitLogin()}
+                    <Button title={'登录'} color="#028CE5" onPress={() => this._registdBtn()}
                         style={{ flex: 1, height: 40, textAlign: 'center', lineHeight: 40 }} />
-                    <View style={{ marginTop: 10, alignItems: 'center', flexDirection: 'row' ,justifyContent:'center'}}>
+                    <View style={{ marginTop: 10, alignItems: 'center', flexDirection: 'row', justifyContent: 'center' }}>
 
                         <Text style={{ fontSize: 13, color: '#666666', textAlign: 'right' }}
-                            onPress={this._registdBtn.bind(this)} >点击注册默认同意</Text>
+                        >点击注册默认同意</Text>
                         <Text style={{ fontSize: 13, color: '#666666', textAlign: 'left', textDecorationLine: 'underline' }}
-                            onPress={this._registdBtn.bind(this)} >《版权登记用户使用条款》</Text>
+                        >《版权登记用户使用条款》</Text>
                     </View>
                 </View>
             </View>

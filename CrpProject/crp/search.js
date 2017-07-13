@@ -134,7 +134,7 @@ export default class SearchActivity extends Component {
                     alert('取值失败:' + error);
                 } else {
                     const jsonValue = JSON.parse(result);
-                    if (null != jsonValue && jsonValue.length > 0 && 'null' != jsonValue) {
+                    if (null != jsonValue && jsonValue.length > 0 ) {
 
                         historyList = jsonValue;
                         this.setState({

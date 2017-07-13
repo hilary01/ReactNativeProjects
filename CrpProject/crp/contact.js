@@ -27,6 +27,7 @@ import StringUtil from './StringUtil';
 import CommonDialog from 'react-native-dialogs-master';
 var Dimensions = require('Dimensions');
 var ScreenWidth = Dimensions.get('window').width;
+import CompletActivity from './complet_info'
 export default class MyContact extends Component {
 
     // 构造
@@ -98,8 +99,12 @@ export default class MyContact extends Component {
 
     //跳往完善信息
     completBtn() {
-
-        alert('去完善信息');
+        this.props.navigator.push({
+            component: CompletActivity,
+            params: {
+                userType: this.state.UserInfos.usertype
+            }
+        })
 
     }
     //跳往绑定邮箱
@@ -110,7 +115,6 @@ export default class MyContact extends Component {
     }
 
     cancleBtn() {
-        alert('取消按钮');
 
     }
     /**
@@ -195,6 +199,8 @@ export default class MyContact extends Component {
 
         var isBind = false;
         var userEntity = this.state.UserInfos;
+        alert(JSON.stringify(userEntity));
+        // alert('isapproved='+userEntity.isapproved);
         if (null != userEntity && StringUtil.isNotEmpty(userEntity.isapproved) && "1" ==
             userEntity.isapproved) {
             isBind = true;
@@ -217,7 +223,7 @@ export default class MyContact extends Component {
 
         var isComp = false;
         var userEntity = this.state.UserInfos;
-        alert('isdetail=' + userEntity.isdetail);
+        // alert('isdetail=' + userEntity.isdetail);
         if (null != userEntity && StringUtil.isNotEmpty(userEntity.isdetail) && "1" ==
             userEntity.isdetail) {
             isComp = true;
@@ -288,7 +294,7 @@ export default class MyContact extends Component {
                         <TouchableNativeFeedback onPress={() => this._onclickBtn('3')}>
                             <View style={styles.header_view}>
                                 <Image style={styles.head_icon} source={(typeof Global.userIcon == 'undefined') ? (DEFAULT_ICON) : { uri: Global.userIcon }} />
-                                <Text style={{ fontSize: 14, color: '#ffffff' }}>{(typeof Global.userName == 'undefined') ? ('登录 / 注册') : Global.userName}</Text>
+                                <Text style={{ fontSize: 14, color: '#ffffff' }}>{((Global.isLogin == false) || (typeof Global.isLogin == 'undefined')) ? ('登录 / 注册') : Global.userName}</Text>
 
                             </View>
 
@@ -374,7 +380,7 @@ const styles = StyleSheet.create({
     }
     , header_view: {
 
-        height: 120,
+
         alignItems: 'center',
         justifyContent: 'center',
 
