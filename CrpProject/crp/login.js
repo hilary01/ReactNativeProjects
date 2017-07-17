@@ -25,6 +25,7 @@ import StringBufferUtils from './StringBufferUtil';
 import DeviceStorage from './deviceStorage';
 import Global from './global';
 import RegistActivity from './regist'
+import VailEmainActivity from './vail_email'
 export default class LoginInput extends Component {
     constructor(props) {
         super(props);
@@ -167,7 +168,13 @@ export default class LoginInput extends Component {
     //忘记密码
     _forgetPassWordBtn() {
 
-        alert('忘记密码');
+        this.props.navigator.push({
+            component: VailEmainActivity,
+            params: {
+
+
+            }
+        })
     }
     //注册
     _registdBtn() {

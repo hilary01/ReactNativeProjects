@@ -21,15 +21,16 @@ import Global from './global';
 var BACK_ICON = require('./images/tabs/nav_return.png');
 var time_count = 60;
 import STTabbar from './STTabbar'
-import CompletActivity from './complet_info'
-export default class BindEmailActivity extends Component {
+import ResetActivity from './reset_pass'
+export default class VailEmainActivity extends Component {
     constructor(props) {
         super(props);
         this.state = {
             email: '',
             vali_code: '',
             vali_txt: '获取验证码',
-            init_color: true
+            init_color: true,
+            UserInfos: {}
 
         }
 
@@ -40,6 +41,13 @@ export default class BindEmailActivity extends Component {
 
             }
         );
+
+    }
+    componentDidMount() {
+
+        this.getUserInfo();
+
+
 
     }
     /**
@@ -157,35 +165,20 @@ export default class BindEmailActivity extends Component {
             show: true
 
         })
+        var userEntity = this.state.UserInfos;
         StringBufferUtils.init();
-        StringBufferUtils.append('userid=' + Global.userName);
+        StringBufferUtils.append('userid=' + userEntity.userid);
         StringBufferUtils.append('&&email=' + emailTxt);
         StringBufferUtils.append('&&valicode=' + vali_code);
-        StringBufferUtils.append('&&type=' + '0');
-
+        StringBufferUtils.append('&&type=' + '1');
         let params = StringBufferUtils.toString();
         this.fetchData(params);
 
 
     }
-    //保存用户信息
-    saveUserInfoData(value) {
-        AsyncStorage.removeItem('user_info_key');
-        AsyncStorage.setItem(
-            'user_info_key',
-            value,
-            (error) => {
-                if (error) {
-                    alert('存值失败:', error);
-                } else {
-
-                }
-            }
-        );
-    }
+    //获取用户信息
     getUserInfo() {
 
-        var that = this;
         AsyncStorage.getItem(
             'user_info_key',
             (error, result) => {
@@ -194,21 +187,17 @@ export default class BindEmailActivity extends Component {
                 } else {
                     const jsonValue = JSON.parse(result);
                     if (null != jsonValue) {
-                        jsonValue.isapproved = '1';
-                        var json = JSON.stringify(jsonValue);
-                        alert(json);
-                        this.saveUserInfoData(json);
-                        that.props.navigator.push({
-                            component: CompletActivity,
-                            params: {
-                                userType: jsonValue.usertype
-                            }
+                        this.setState({
+
+                            UserInfos: jsonValue
+
                         })
                     }
 
                 }
             }
         )
+
     }
     fetchData(param) {
         //get请求,以百度为例,没有参数,没有header
@@ -218,7 +207,12 @@ export default class BindEmailActivity extends Component {
             //下面的就是请求来的数据
             var json = JSON.stringify(set.result);
             if (null != set && null != set.return_code && set.return_code == '0') {
-                that.getUserInfo();
+                that.props.navigator.push({
+                    component: ResetActivity,
+                    params: {
+                        email: that.state.email
+                    }
+                })
                 that.setState({
 
                     show: false
@@ -241,7 +235,7 @@ export default class BindEmailActivity extends Component {
         return (
 
             <View style={styles.page}>
-                <PublicTitle text='绑定邮箱' _backOnclick={this._backOnclick.bind(this)} left_icon={BACK_ICON} />
+                <PublicTitle text='验证邮箱' _backOnclick={this._backOnclick.bind(this)} left_icon={BACK_ICON} />
                 <StatusBar
                     animated={true}
                     hidden={false}
@@ -273,13 +267,8 @@ export default class BindEmailActivity extends Component {
                 <View style={{ marginTop: 30, marginLeft: 10, marginRight: 10 }}>
 
 
-                    <Button title={'完成'} color="#028CE5" onPress={() => this._finishBtn()}
+                    <Button title={'下一步'} color="#028CE5" onPress={() => this._finishBtn()}
                         style={{ flex: 1, height: 40, textAlign: 'center', lineHeight: 40 }} />
-                    <View style={{ marginTop: 10, alignItems: 'center', flexDirection: 'row', justifyContent: 'center' }}>
-
-                        <Text style={{ fontSize: 14, color: '#666666', textAlign: 'center' }}
-                            onPress={this._nextBtn.bind(this)} >下次再说</Text>
-                    </View>
                 </View>
             </View>
 

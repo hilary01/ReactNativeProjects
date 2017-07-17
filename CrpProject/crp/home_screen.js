@@ -9,11 +9,13 @@ import {
     FlatList,
     TouchableNativeFeedback,
     ProgressBarAndroid,
-    ToastAndroid
+    ToastAndroid,
+    AsyncStorage
 } from 'react-native';
 import ViewPager from 'react-native-viewpager';
 import LoadView from './loading'
 var HOME_URL = 'http://drmlum.rdgchina.com/drmapp/index/indexlist';
+var CITY_URL = 'http://drmlum.rdgchina.com/drmapp/publicfuc/regionlist';
 const RULE_BG = require('./images/tabs/rule_bg.png');
 const RULE_ICONS = require('./images/tabs/rule_icons.png');
 const RIGHT_ICONS = require('./images/tabs/icon_more.png');
@@ -101,14 +103,77 @@ export default class TopScreen extends Component {
             }
             this.setState({
                 noticeData: noticeList,
-                show: false
-            });
 
+            });
+            this.getCityData();
 
         }
     }
 
+    // 数据请求 
+    fetchCityData(url) {
+        var that = this;
+        NetUitl.post(url, '', '', function (responseData) {
+            //下面的就是请求来的数据
+            if (null != responseData && 'undefind' != responseData && responseData.return_code == '0') {
+                that.saveCityData(responseData.result);
+                that.setState({
+                    show: false
+                });
+            } else {
+                that.setState({
+                    show: false
+                });
 
+            }
+        })
+    }
+    /**
+     * 获取城市信息
+     */
+    getCityData() {
+        var that = this;
+
+        AsyncStorage.getItem(
+            'city_list',
+            (error, result) => {
+                if (error) {
+                    alert('取值失败:' + error);
+                } else {
+                    const jsonValue = JSON.parse(result);
+                    if (null != jsonValue) {
+
+                        that.setState({
+
+                            show: false
+                        })
+
+                    } else {
+                        that.fetchCityData(CITY_URL);
+
+                    }
+
+                }
+            }
+        )
+    }
+
+    //保存城市信息
+    saveCityData(value) {
+
+        AsyncStorage.setItem(
+            'city_list',
+            JSON.stringify(value),
+            (error) => {
+                if (error) {
+                    alert('存值失败:', error);
+                } else {
+
+                    alert('保存城市数据成功');
+                }
+            }
+        );
+    }
     _renderAdvPage(item, pageID) {
         return (
             <Image

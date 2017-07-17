@@ -28,6 +28,7 @@ import CommonDialog from 'react-native-dialogs-master';
 var Dimensions = require('Dimensions');
 var ScreenWidth = Dimensions.get('window').width;
 import CompletActivity from './complet_info'
+import BindEmail from './bind_email'
 export default class MyContact extends Component {
 
     // 构造
@@ -109,8 +110,17 @@ export default class MyContact extends Component {
     }
     //跳往绑定邮箱
     bindBtn() {
-
-        alert('去绑定邮箱');
+           this.props.navigator.push({
+            component: CompletActivity,
+            params: {
+                userType: this.state.UserInfos.usertype
+            }
+        })
+        // this.props.navigator.push({
+        //     component: BindEmail,
+        //     params: {
+        //     }
+        // })
 
     }
 
@@ -199,7 +209,7 @@ export default class MyContact extends Component {
 
         var isBind = false;
         var userEntity = this.state.UserInfos;
-        alert(JSON.stringify(userEntity));
+        // alert(JSON.stringify(userEntity));
         // alert('isapproved='+userEntity.isapproved);
         if (null != userEntity && StringUtil.isNotEmpty(userEntity.isapproved) && "1" ==
             userEntity.isapproved) {
