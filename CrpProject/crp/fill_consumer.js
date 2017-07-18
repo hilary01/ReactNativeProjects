@@ -21,6 +21,9 @@ import Global from './global';
 var BACK_ICON = require('./images/tabs/nav_return.png');
 import BindEmail from './bind_email';
 const ICON_MORE = require('./images/tabs/icon_more.png');
+import Picker from 'react-native-picker';
+// import PickerAndroid from 'react-native-picker-android';
+import CityPicker from './city_picker'
 export default class ResetActivity extends Component {
     constructor(props) {
         super(props);
@@ -34,10 +37,7 @@ export default class ResetActivity extends Component {
             registNum: '',
             law_person: '',
             cerOrg: '',
-            cityStatus: false,
-            cityText: '',
-            cityId: '',
-            city_data: {}
+            show_city_picker: false
 
 
         }
@@ -123,32 +123,15 @@ export default class ResetActivity extends Component {
         return id;
 
     }
+
     /**
-    * 获取城市信息
-    */
-    getCityData() {
-        var that = this;
+     * 选择城市
+     */
+    selectCity() {
+        this.setState({
 
-        AsyncStorage.getItem(
-            'city_list',
-            (error, result) => {
-                if (error) {
-                    alert('取值失败:' + error);
-                } else {
-                    const jsonValue = JSON.parse(result);
-                    if (null != jsonValue) {
-                        that.setState({
-
-                            city_data: jsonValue
-
-                        })
-                    } else {
-
-                    }
-
-                }
-            }
-        )
+            show_city_picker: true
+        })
     }
 
     _registdBtn() {
@@ -331,7 +314,7 @@ export default class ResetActivity extends Component {
         var nameTxt = this.props.userType == '0' ? '姓名' : '公司名称';
         var nameHint = this.props.userType == '0' ? '请输入您的真实姓名' : '请输入您的企业名称';
         return (
-
+           
             <View style={styles.page}>
                 <PublicTitle text={title} _backOnclick={this._backOnclick.bind(this)} left_icon={BACK_ICON} />
                 <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#ffffff', height: 45 }} >
@@ -366,7 +349,7 @@ export default class ResetActivity extends Component {
                 <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#ffffff', height: 45 }} >
 
                     <Text style={{ color: '#666666', width: 60, textAlign: 'left', flex: 1, marginLeft: 10, marginRight: 10 }}>{areal_title}</Text>
-                    <TouchableNativeFeedback onPress={() => this.handleCityPress()}>
+                    <TouchableNativeFeedback onPress={() => this.selectCity()}>
                         <View style={{ flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center' }}>
 
                             <Text style={{ color: '#999999', textAlign: 'center' }}>{this.state.areal}</Text>
@@ -411,12 +394,14 @@ export default class ResetActivity extends Component {
                 <View style={{ height: 1, backgroundColor: '#e2e2e2', marginLeft: 10, marginRight: 10 }}></View>
                 {this._lawPerson()}
                 {this._sendCerOrg()}
+                 <CityPicker visible={this.state.show_city_picker} />
                 <View style={{ marginTop: 30, flex: 1, justifyContent: 'flex-end' }}>
 
 
                     <Button title={'提交'} color="#028CE5" onPress={() => this._registdBtn()}
                         style={{ flex: 1, height: 40, textAlign: 'center', lineHeight: 40 }} />
                 </View>
+
             </View>
 
 

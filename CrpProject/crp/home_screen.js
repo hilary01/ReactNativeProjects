@@ -24,9 +24,9 @@ const NOTICE_ICONS = require('./images/tabs/notice_icons.png');
 const POINT_ICONS = require('./images/tabs/point_icons.png');
 import WebviewDetail from './webdetail';
 import NetUitl from './netUitl';
-import NoticeActivity from './notice_list'
-import LawActivity from './law_rule'
-import NewsActivity from './news_list'
+import NoticeActivity from './notice_list';
+import LawActivity from './law_rule';
+import NewsActivity from './news_list';
 export default class TopScreen extends Component {
     constructor(props) {
         super(props);
