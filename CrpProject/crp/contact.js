@@ -72,7 +72,7 @@ export default class MyContact extends Component {
                     that.props.navigator.push({
                         component: Activity,
                         params: {
-
+                            userType: this.state.UserInfos.usertype
 
                         }
                     })
@@ -110,17 +110,17 @@ export default class MyContact extends Component {
     }
     //跳往绑定邮箱
     bindBtn() {
-           this.props.navigator.push({
-            component: CompletActivity,
-            params: {
-                userType: this.state.UserInfos.usertype
-            }
-        })
-        // this.props.navigator.push({
-        //     component: BindEmail,
+        //    this.props.navigator.push({
+        //     component: CompletActivity,
         //     params: {
+        //         userType: this.state.UserInfos.usertype
         //     }
         // })
+        this.props.navigator.push({
+            component: BindEmail,
+            params: {
+            }
+        })
 
     }
 
@@ -303,7 +303,7 @@ export default class MyContact extends Component {
                     <Image style={styles.top_img} source={TOP_IMAGE}>
                         <TouchableNativeFeedback onPress={() => this._onclickBtn('3')}>
                             <View style={styles.header_view}>
-                                <Image style={styles.head_icon} source={(typeof Global.userIcon == 'undefined') ? (DEFAULT_ICON) : { uri: Global.userIcon }} />
+                                <Image style={styles.head_icon} source={((typeof Global.userIcon == 'undefined') || Global.userIcon == '') ? (DEFAULT_ICON) : { uri: Global.userIcon }} />
                                 <Text style={{ fontSize: 14, color: '#ffffff' }}>{((Global.isLogin == false) || (typeof Global.isLogin == 'undefined')) ? ('登录 / 注册') : Global.userName}</Text>
 
                             </View>
@@ -334,7 +334,7 @@ export default class MyContact extends Component {
                 {/*证书管理*/}
                 <View style={{ flexDirection: 'row', height: 48, marginTop: 1, backgroundColor: '#ffffff', alignItems: 'center' }}>
 
-                    <TouchableNativeFeedback >
+                    <TouchableNativeFeedback onPress={() => this._onclickBtn('2')}>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }} >
                             <View style={{ flexDirection: 'row', justifyContent: 'flex-start', width: 160, alignItems: 'center', marginLeft: 10, flex: 1, height: 48 }}>
 

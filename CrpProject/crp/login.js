@@ -103,11 +103,18 @@ export default class LoginInput extends Component {
                 Global.isLogin = true;
                 Global.userName = set.result.username;
                 Global.userIcon = set.result.persion.headimg;
+                Global.userId = set.result.userid;
+                var userEntity = new Object();
+                userEntity.userName = that.state.userName;
+                userEntity.passWord = that.state.password;
+                userEntity.userId = set.result.userid;
+                that.saveUserNameData(userEntity);
                 that.setState({
 
                     show: false
 
                 })
+
                 ToastAndroid.show(set.msg, ToastAndroid.SHORT);
                 that.props.navigator.pop(
                     {
@@ -124,6 +131,22 @@ export default class LoginInput extends Component {
 
         })
 
+    }
+    //保存用户信息
+    saveUserNameData(value) {
+        var json = JSON.stringify(value);
+
+        AsyncStorage.removeItem('user_name_key');
+        AsyncStorage.setItem(
+            'user_name_key',
+            json,
+            (error) => {
+                if (error) {
+                    alert('存值失败:', error);
+                } else {
+                }
+            }
+        );
     }
     //保存用户信息
     saveUserInfoData(value) {

@@ -27,7 +27,9 @@ export default class HeaderNoBack extends Component {
                 <View style={styles.right_view} >
 
                     <TouchableNativeFeedback onPress={() => this.props._searchOnlcik()} >
+
                         <Image style={styles.right_icon} source={this.props.icon}></Image>
+
                     </TouchableNativeFeedback>
                 </View>
             </View>

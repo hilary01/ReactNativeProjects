@@ -32,7 +32,25 @@ export default class NetUitl extends React.Component {
     // componentWillUnmount() {
     //     NetWorkTool.removeEventListener(NetWorkTool.TAG_NETWORK_CHANGE, this.handleMethod);
     // }
+    static getFetch(url, params, callback) {
+        var str = '';
+        if (typeof params === 'object' && params) {
+            str += '?';
+            Object.keys(params).forEach(function (val) {
+                str += val + '=' + encodeURIComponent(params[val]) + '&';
+            })
+        }
 
+        fetch(url + str, {
+            method: 'GET'
+        }).then(function (res) {
+            res.json().then(function (data) {
+                callback(data);
+            })
+        }, function (e) {
+            console.log('请求失败');
+        })
+    }
     /*
      *  get请求
      *  url:请求地址
@@ -40,27 +58,40 @@ export default class NetUitl extends React.Component {
      *  callback:回调函数
      * */
     static get(url, params, callback) {
-        if (params) {
-            let paramsArray = [];
-            //拼接参数
-            Object.keys(params).forEach(key => paramsArray.push(key + '=' + params[key]))
-            if (url.search(/\?/) === -1) {
-                url += '?' + paramsArray.join('&')
-            } else {
-                url += '&' + paramsArray.join('&')
-            }
+        var str = '';
+        if (typeof params === 'object' && params) {
+            str += '?';
+            Object.keys(params).forEach(function (val) {
+                str += val + '=' + encodeURIComponent(params[val]) + '&';
+            })
         }
         //fetch请求
-        fetch(url, {
+        alert(url + str);
+        fetch(url + str, {
             method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json' //记得加上这行，不然bodyParser.json() 会识别不了
-            },
         })
             .then((response) => {
-                callback(response)
+                response.json()
+                alert(JSON.stringify(response.text()));
+                callback(response.json())
+            })
+            .catch((err) => {
+                ToastAndroid.show('服务器异常，请稍后再试！', ToastAndroid.SHORT);
+                callback(err)
             }).done();
+    }
+
+    static toQueryString(obj) {
+        return obj ? Object.keys(obj).sort().map(function (key) {
+            var val = obj[key];
+            if (Array.isArray(val)) {
+                return val.sort().map(function (val2) {
+                    return encodeURIComponent(key) + '=' + encodeURIComponent(val2);
+                }).join('&');
+            }
+
+            return encodeURIComponent(key) + '=' + encodeURIComponent(val);
+        }).join('&') : '';
     }
     /*
      *  post请求
@@ -83,11 +114,26 @@ export default class NetUitl extends React.Component {
                 callback(responseJSON)
             }).catch((err) => {
                 ToastAndroid.show('服务器异常，请稍后再试！', ToastAndroid.SHORT);
-                callback(err)
-
             }).done();
     }
-
+    static postMtheord(url, params, headers, callback) {
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                //表单
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: params,
+            timeout: 60 * 1000
+        })
+            .then((response) => response.json())
+            .then((responseJSON) => {
+                callback(responseJSON)
+            }).catch((err) => {
+                ToastAndroid.show('服务器异常，请稍后再试！', ToastAndroid.SHORT);
+            }).done();
+    }
 
     // let params = {'start':'0',limit:'20','isNeedCategory': true, 'lastRefreshTime': '2016-09-25 09:45:12'};
     //     NetUitl.post('http://www.pintasty.cn/home/homedynamic',params,'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJVLTliZGJhNjBjMjZiMDQwZGJiMTMwYWRhYWVlN2FkYTg2IiwiZXhwaXJhdGlvblRpbWUiOjE0NzUxMTg4ODU4NTd9.ImbjXRFYDNYFPtK2_Q2jffb2rc5DhTZSZopHG_DAuNU',function (set) {

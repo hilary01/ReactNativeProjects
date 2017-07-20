@@ -8,10 +8,11 @@ import {
     Button,
     AsyncStorage,
     Image,
-    TouchableNativeFeedback
+    TouchableNativeFeedback,
+    StatusBar
 } from 'react-native';
 import PublicTitle from './public_title.js'
-var REGIST_URL = 'http://drmlum.rdgchina.com/drmapp/person/passedit';
+var EDITINFO_URL = 'http://drmlum.rdgchina.com/drmapp/person/infoedit';
 import StringUtil from './StringUtil';
 import LoadView from './loading';
 import NetUitl from './netUitl';
@@ -23,11 +24,12 @@ import BindEmail from './bind_email';
 const ICON_MORE = require('./images/tabs/icon_more.png');
 import Picker from 'react-native-picker';
 // import PickerAndroid from 'react-native-picker-android';
-import CityPicker from './city_picker'
-export default class ResetActivity extends Component {
+import CityPicker from './city_picker';
+export default class onsumerActivity extends Component {
     constructor(props) {
         super(props);
         this.state = {
+            headimg: '',
             realName: '',
             credentials: '身份证',
             areal: '请选择',
@@ -37,7 +39,9 @@ export default class ResetActivity extends Component {
             registNum: '',
             law_person: '',
             cerOrg: '',
-            show_city_picker: false
+            show_city_picker: false,
+            provinceId: '',
+            cityId: ''
 
 
         }
@@ -51,6 +55,7 @@ export default class ResetActivity extends Component {
 
         })
     }
+
     _gotoPickerUtil() {
 
         this._showPicker();
@@ -134,46 +139,140 @@ export default class ResetActivity extends Component {
         })
     }
 
-    _registdBtn() {
-        var pass_word = this.state.passWord;
-        var ok_pass = this.state.okPassWord;
-        var old_pass = this.state.oldpass;
-        if (!StringUtil.isNotEmpty(old_pass) || old_pass.length < 5) {
+    _submiteBtn() {
+        var realname = this.state.realName;
+        var cerType = this._getTypeId(this.state.credentials, this.props.userType);
 
-            ToastAndroid.show('请输入6-12位旧密码', ToastAndroid.SHORT);
-            return;
-        }
-        if (!StringUtil.isNotEmpty(pass_word) || pass_word.length < 5) {
+        if (this.props.userType == '0') {
+            if (!StringUtil.isNotEmpty(realname)) {
 
-            ToastAndroid.show('请输入6-12位密码', ToastAndroid.SHORT);
-            return;
-        }
-        if (pass_word != ok_pass) {
+                ToastAndroid.show('请输入您的真实姓名', ToastAndroid.SHORT);
+                return;
+            }
+            if (!StringUtil.isNotEmpty(this.state.provinceId) || !StringUtil.isNotEmpty(this.state.cityId)) {
 
-            ToastAndroid.show('两次输入密码不一致', ToastAndroid.SHORT);
-            return;
+                ToastAndroid.show('请选择籍贯', ToastAndroid.SHORT);
+                return;
+            }
+            if (!StringUtil.isNotEmpty(this.state.address)) {
+
+                ToastAndroid.show('请输入您的详细地址', ToastAndroid.SHORT);
+                return;
+            }
+            if (!StringUtil.isNotEmpty(this.state.credentNum)) {
+
+                ToastAndroid.show('请输入您的证件号码', ToastAndroid.SHORT);
+                return;
+            }
+            if (!StringUtil.isNotEmpty(this.state.phone)) {
+
+                ToastAndroid.show('请输入您的手机号码', ToastAndroid.SHORT);
+                return;
+            }
+        } else {
+            if (!StringUtil.isNotEmpty(realname)) {
+
+                ToastAndroid.show('请输入您的企业名称', ToastAndroid.SHORT);
+                return;
+            }
+
+            // if (!StringUtil.isNotEmpty(this.state.registNum)) {
+
+            //     ToastAndroid.show('请输入您的注册号', ToastAndroid.SHORT);
+            //     return;
+            // }
+            if (!StringUtil.isNotEmpty(this.state.provinceId) || !StringUtil.isNotEmpty(this.state.cityId)) {
+
+                ToastAndroid.show('请选择区域', ToastAndroid.SHORT);
+                return;
+            }
+            if (!StringUtil.isNotEmpty(this.state.address)) {
+
+                ToastAndroid.show('请输入您的详细地址', ToastAndroid.SHORT);
+                return;
+            }
+            if (!StringUtil.isNotEmpty(this.state.phone)) {
+
+                ToastAndroid.show('请输入您的手机号码', ToastAndroid.SHORT);
+                return;
+            }
+            if (!StringUtil.isNotEmpty(this.state.law_person)) {
+
+                ToastAndroid.show('请输入您的法人姓名', ToastAndroid.SHORT);
+                return;
+            }
+            if (!StringUtil.isNotEmpty(this.state.cerOrg)) {
+
+                ToastAndroid.show('请输入您的发证机构', ToastAndroid.SHORT);
+                return;
+            }
         }
+
+
         this.setState({
 
             show: true
 
         })
         StringBufferUtils.init();
-        StringBufferUtils.append('type=' + '2');
-        StringBufferUtils.append('&&password=' + pass_word);
-        StringBufferUtils.append('&&userid=' + Global.userName);
-        StringBufferUtils.append('&&conpassword=' + ok_pass);
-        StringBufferUtils.append('&&oldpass=' + old_pass);
-
+        StringBufferUtils.append('headimg=' + this.state.headimg);
+        StringBufferUtils.append('&&userid=' + Global.userId);
+        StringBufferUtils.append('&&usertype=' + this.props.userType);
+        StringBufferUtils.append('&&realname=' + realname);
+        StringBufferUtils.append('&&certificatetype=' + cerType);
+        StringBufferUtils.append('&&nation=' + '1');
+        StringBufferUtils.append('&&province=' + this.state.provinceId);
+        StringBufferUtils.append('&&city=' + this.state.cityId);
+        StringBufferUtils.append('&&address=' + this.state.address);
+        StringBufferUtils.append('&&certificatenum=' + this.state.credentNum);
+        StringBufferUtils.append('&&phone=' + this.state.phone);
+        StringBufferUtils.append('&&enterpriselegalperson=' + this.state.law_person);
+        StringBufferUtils.append('&&certifyingauthority=' + this.state.cerOrg);
         let params = StringBufferUtils.toString();
         this.fetchData(params);
 
 
     }
+    //保存用户信息
+    saveUserInfoData(value) {
+        AsyncStorage.removeItem('user_info_key');
+        AsyncStorage.setItem(
+            'user_info_key',
+            value,
+            (error) => {
+                if (error) {
+                    alert('存值失败:', error);
+                } else {
+
+                }
+            }
+        );
+    }
+    getUserInfo() {
+
+        var that = this;
+        AsyncStorage.getItem(
+            'user_info_key',
+            (error, result) => {
+                if (error) {
+                    alert('取值失败:' + error);
+                } else {
+                    const jsonValue = JSON.parse(result);
+                    if (null != jsonValue) {
+                        jsonValue.isdetail = '1';
+                        var json = JSON.stringify(jsonValue);
+                        this.saveUserInfoData(json);
+
+                    }
+
+                }
+            }
+        )
+    }
     fetchData(param) {
         //get请求,以百度为例,没有参数,没有header
         var that = this;
-        NetUitl.post(REGIST_URL, param, '', function (set) {
+        NetUitl.post(EDITINFO_URL, param, '', function (set) {
 
             //下面的就是请求来的数据
             if (null != set && null != set.return_code && set.return_code == '0') {
@@ -195,6 +294,19 @@ export default class ResetActivity extends Component {
 
         })
 
+    }
+
+    pushDetails() {
+        var cityEntity = this.refs.cPicker.passMenthod();
+        var place = cityEntity.province + ' ' + cityEntity.city;
+        this.setState({
+
+            areal: place,
+            show_city_picker: false,
+            provinceId: cityEntity.provinceid,
+            cityId: cityEntity.cityid
+
+        })
     }
     /**
      * 证件号
@@ -314,8 +426,15 @@ export default class ResetActivity extends Component {
         var nameTxt = this.props.userType == '0' ? '姓名' : '公司名称';
         var nameHint = this.props.userType == '0' ? '请输入您的真实姓名' : '请输入您的企业名称';
         return (
-           
+
             <View style={styles.page}>
+                <StatusBar
+                    animated={true}
+                    hidden={false}
+                    backgroundColor={'#028CE5'}
+                    barStyle={'default'}
+                    networkActivityIndicatorVisible={true}
+                />
                 <PublicTitle text={title} _backOnclick={this._backOnclick.bind(this)} left_icon={BACK_ICON} />
                 <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#ffffff', height: 45 }} >
 
@@ -345,7 +464,7 @@ export default class ResetActivity extends Component {
 
                 </View>
                 <View style={{ height: 1, backgroundColor: '#e2e2e2', marginLeft: 10, marginRight: 10 }}></View>
-                {this._registNum()}
+                {/* {this._registNum()} */}
                 <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#ffffff', height: 45 }} >
 
                     <Text style={{ color: '#666666', width: 60, textAlign: 'left', flex: 1, marginLeft: 10, marginRight: 10 }}>{areal_title}</Text>
@@ -394,11 +513,11 @@ export default class ResetActivity extends Component {
                 <View style={{ height: 1, backgroundColor: '#e2e2e2', marginLeft: 10, marginRight: 10 }}></View>
                 {this._lawPerson()}
                 {this._sendCerOrg()}
-                 <CityPicker visible={this.state.show_city_picker} />
+                <CityPicker visible={this.state.show_city_picker} callbackParent={() => this.pushDetails()} ref="cPicker" />
                 <View style={{ marginTop: 30, flex: 1, justifyContent: 'flex-end' }}>
 
 
-                    <Button title={'提交'} color="#028CE5" onPress={() => this._registdBtn()}
+                    <Button title={'提交'} color="#028CE5" onPress={() => this._submiteBtn()}
                         style={{ flex: 1, height: 40, textAlign: 'center', lineHeight: 40 }} />
                 </View>
 

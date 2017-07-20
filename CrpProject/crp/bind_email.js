@@ -12,16 +12,17 @@ import {
 import PublicTitle from './public_title.js'
 var VALIDATE_URL = 'http://drmlum.rdgchina.com/drmapp/mail/validate';
 var BINDEMAIL_URL = 'http://drmlum.rdgchina.com/drmapp/mail/bind';
+var VALIEMAIL_URL = 'http://drmlum.rdgchina.com/drmapp/mail/send';
 import StringUtil from './StringUtil';
 import LoadView from './loading';
 import NetUitl from './netUitl';
 import StringBufferUtils from './StringBufferUtil';
 import DeviceStorage from './deviceStorage';
-import Global from './global';
 var BACK_ICON = require('./images/tabs/nav_return.png');
 var time_count = 60;
-import STTabbar from './STTabbar'
-import CompletActivity from './complet_info'
+import STTabbar from './STTabbar';
+import CompletActivity from './complet_info';
+import Global from './global';
 export default class BindEmailActivity extends Component {
     constructor(props) {
         super(props);
@@ -43,9 +44,9 @@ export default class BindEmailActivity extends Component {
 
     }
     /**
-     * 获取验证码
+     * 检查邮箱
      */
-    _getValiCode() {
+    _getCheckEmail() {
         var emailTxt = this.state.email;
         if (!StringUtil.isNotEmpty(emailTxt)) {
 
@@ -60,13 +61,13 @@ export default class BindEmailActivity extends Component {
         StringBufferUtils.init();
         StringBufferUtils.append('email=' + emailTxt);
         let params = StringBufferUtils.toString();
-        this.getVailCodeData(params);
+        this.getcheckData(params);
     }
     /**
-     * 获取验证码
+     *检查邮箱是否可用
      * @param {*} param 
      */
-    getVailCodeData(param) {
+    getcheckData(param) {
         //get请求,以百度为例,没有参数,没有header
         var that = this;
         NetUitl.post(VALIDATE_URL, param, '', function (set) {
@@ -74,13 +75,8 @@ export default class BindEmailActivity extends Component {
             //下面的就是请求来的数据
             var json = JSON.stringify(set.result);
             if (null != set && null != set.return_code && set.return_code == '0') {
-                that._countTime();
-                that.setState({
+                that._getValiCode();
 
-                    show: false
-
-                })
-                ToastAndroid.show(set.msg, ToastAndroid.SHORT);
             } else {
                 ToastAndroid.show(set.msg, ToastAndroid.SHORT);
                 that.setState({
@@ -140,14 +136,13 @@ export default class BindEmailActivity extends Component {
     }
     _finishBtn() {
         var emailTxt = this.state.email;
-        var vali_code = this.state.vali_code;
-        var ok_pass = this.state.okPassWord;
+        var valiCode = this.state.vali_code;
         if (!StringUtil.isNotEmpty(emailTxt)) {
 
             ToastAndroid.show('请输入您的邮箱', ToastAndroid.SHORT);
             return;
         }
-        if (!StringUtil.isNotEmpty(vali_code)) {
+        if (!StringUtil.isNotEmpty(valiCode)) {
 
             ToastAndroid.show('请输入验证码', ToastAndroid.SHORT);
             return;
@@ -158,14 +153,55 @@ export default class BindEmailActivity extends Component {
 
         })
         StringBufferUtils.init();
-        StringBufferUtils.append('userid=' + Global.userName);
+        StringBufferUtils.append('userid=' + Global.userId);
         StringBufferUtils.append('&&email=' + emailTxt);
-        StringBufferUtils.append('&&valicode=' + vali_code);
+        StringBufferUtils.append('&&valicode=' + valiCode);
         StringBufferUtils.append('&&type=' + '0');
 
         let params = StringBufferUtils.toString();
         this.fetchData(params);
 
+
+    }
+    _getValiCode() {
+        var emailTxt = this.state.email;
+        StringBufferUtils.init();
+        StringBufferUtils.append('userid=' + Global.userId);
+        StringBufferUtils.append('&&email=' + emailTxt);
+        let params = StringBufferUtils.toString();
+        this.getValiCodeData(params);
+
+
+    }
+
+    /**
+    *检查邮箱是否可用
+    * @param {*} param 
+    */
+    getValiCodeData(param) {
+        //get请求,以百度为例,没有参数,没有header
+        var that = this;
+        NetUitl.post(VALIEMAIL_URL, param, '', function (set) {
+
+            //下面的就是请求来的数据
+            var json = JSON.stringify(set.result);
+            if (null != set && null != set.return_code && set.return_code == '0') {
+                that._countTime();
+                that.setState({
+
+                    show: false
+
+                })
+                ToastAndroid.show(set.msg, ToastAndroid.SHORT);
+            } else {
+                ToastAndroid.show(set.msg, ToastAndroid.SHORT);
+                that.setState({
+                    show: false
+                });
+
+            }
+
+        })
 
     }
     //保存用户信息
@@ -196,7 +232,6 @@ export default class BindEmailActivity extends Component {
                     if (null != jsonValue) {
                         jsonValue.isapproved = '1';
                         var json = JSON.stringify(jsonValue);
-                        alert(json);
                         this.saveUserInfoData(json);
                         that.props.navigator.push({
                             component: CompletActivity,
@@ -258,7 +293,7 @@ export default class BindEmailActivity extends Component {
                         value={this.state.email}
                     />
                     <Text style={this.state.init_color == true ? ({ position: 'absolute', justifyContent: 'flex-end', backgroundColor: '#9fa8b6', textAlign: 'center', padding: 3, marginLeft: 268, width: 80 }) : ({ width: 80, position: 'absolute', justifyContent: 'flex-end', backgroundColor: '#dddddd', textAlign: 'center', padding: 3, marginLeft: 268 })} onPress={() =>
-                        this._getValiCode()}>{this.state.vali_txt}</Text>
+                        this._getCheckEmail()}>{this.state.vali_txt}</Text>
                 </View>
                 <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#ffffff' }} >
 

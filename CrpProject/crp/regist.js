@@ -97,8 +97,10 @@ export default class ApplyActivity extends Component {
                 var userEntity = new Object();
                 userEntity.userName = that.state.userName;
                 userEntity.passWord = that.state.passWord;
+                userEntity.userId = set.result.userid;
                 Global.userName = that.state.userName;
                 Global.passWord = that.state.passWord;
+                Global.userId = set.result.userid;
                 that.saveUserNameData(userEntity);
                 that.setState({
 

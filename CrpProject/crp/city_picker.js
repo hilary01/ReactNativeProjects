@@ -8,12 +8,16 @@ import {
 	AsyncStorage,
 	Modal,
 	TouchableOpacity,
+	Button
 } from 'react-native';
 
 import PickerAndroid from 'react-native-picker-android';
 
 let Picker = PickerAndroid;
 let PickerItem = Picker.Item;
+var Dimensions = require('Dimensions');
+var ScreenWidth = Dimensions.get('window').width;
+var cityEntity = new Object();
 export default class SomeScene extends Component {
 
 	constructor(props, context) {
@@ -24,18 +28,26 @@ export default class SomeScene extends Component {
 			privince_data: {},
 			isLoading: true,
 			modelIndex: 0,
-			visible: this.props.visible
+			visible: this.props.visible,
 
 
 		}
+
 	}
+
 	close = () => {
-		this.setState({ visible: false });
+		// this.setState({ visible: false });
 		// this.props.navigator.pop(
 		// 	{
 
 		// 	}
 		// );
+	}
+	dismiss = () => {
+		this.setState({ visible: false });
+	}
+	passMenthod = () => {
+		return cityEntity;
 	}
 	componentWillReceiveProps(props) {
 		this.setState({ visible: props.visible });
@@ -79,8 +91,11 @@ export default class SomeScene extends Component {
 		if (!this.state.isLoading) {
 			let provincelist = this.state.privince_data;
 			let citylist = provincelist[this.state.city].citylist;
+			cityEntity.provinceid = provincelist[this.state.city].provinceid;
+			cityEntity.province = provincelist[this.state.city].province;
+			cityEntity.cityid = citylist[this.state.modelIndex].cityid;
+			cityEntity.city = citylist[this.state.modelIndex].city;
 			return <View style={styles.background}>
-
 				<Picker
 					pickerStyle={styles.picker_style}
 					selectedValue={this.state.city}
@@ -113,6 +128,19 @@ export default class SomeScene extends Component {
 			</View>
 		}
 	}
+
+	createButon() {
+		return <View style={{ backgroundColor: '#f6f6f6', flexDirection: 'column', height: 45, alignItems: 'center', width: ScreenWidth, alignItems: 'center', }}>
+
+			<View style={{ alignItems: 'center', flexDirection: 'column', justifyContent: 'center' }}>
+				<View style={{ height: 1, backgroundColor: '#e2e2e2', margin: 5, width: ScreenWidth }}></View>
+				<Text onPress={() => this.props.callbackParent()}
+					style={{ textAlign: 'center', width: ScreenWidth, backgroundColor: '#028CE5', color: 'white', paddingTop: 8, paddingBottom: 8 }} >确认</Text>
+
+			</View>
+		</View>
+
+	}
 	render() {
 		return (
 			<View style={styles.page}>
@@ -126,6 +154,7 @@ export default class SomeScene extends Component {
 					>
 						<View style={styles.container} >
 							{this._renderItem()}
+							{this.createButon()}
 						</View>
 					</TouchableOpacity>
 				</Modal>
@@ -138,7 +167,7 @@ export default class SomeScene extends Component {
 const styles = StyleSheet.create({
 
 	page: {
-		height: 400,
+		height: 200,
 		// backgroundColor: 'rgba(0, 0, 0, 0.5)',
 	},
 	item_txt: {
@@ -160,14 +189,15 @@ const styles = StyleSheet.create({
 		backgroundColor: '#f6f6f6'
 	},
 	container: {
+		flexDirection: 'column',
 		flex: 1,
-		position: 'absolute',
 		top: 0,
 		bottom: 0,
 		left: 0,
 		right: 0,
 		justifyContent: 'center',
 		alignItems: 'center',
+		width: ScreenWidth,
 		backgroundColor: 'rgba(0, 0, 0, 0.5)',
 	}, background: {
 		flexDirection: 'row',
