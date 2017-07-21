@@ -169,7 +169,7 @@ export default class TopScreen extends Component {
                     alert('存值失败:', error);
                 } else {
 
-                    alert('保存城市数据成功');
+                    // alert('保存城市数据成功');
                 }
             }
         );

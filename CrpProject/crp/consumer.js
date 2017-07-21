@@ -25,12 +25,28 @@ import BindEmail from './bind_email';
 const ICON_MORE = require('./images/tabs/icon_more.png');
 import Picker from 'react-native-picker';
 import CityPicker from './city_picker';
-var imageUrl = 'http://preview.quanjing.com/yhkj01/yhkj01-5195el.jpg';
+var UPLOAD_URL = 'http://drmlum.rdgchina.com/drmapp/drmfile/upload';
+//图片选择器
+var ImagePicker = require('react-native-image-picker');
+//图片选择器参数设置
+var options = {
+    title: '请选择图片来源',
+    cancelButtonTitle: '取消',
+    takePhotoButtonTitle: '拍照',
+    chooseFromLibraryButtonTitle: '相册图片',
+    // customButtons: [
+    //     { name: 'hangge', title: 'hangge.com图片' },
+    // ],
+    storageOptions: {
+        skipBackup: true,
+        path: 'images'
+    }
+};
 export default class EditConsumerActivity extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            headimg: imageUrl,
+            headimg: '',
             realName: '',
             credentials: '身份证',
             areal: '请选择',
@@ -44,7 +60,8 @@ export default class EditConsumerActivity extends Component {
             provinceId: '',
             cityId: '',
             editable: false,
-            rightBtnTxt: '修改'
+            rightBtnTxt: '修改',
+            image_path: ''
 
 
         }
@@ -76,6 +93,79 @@ export default class EditConsumerActivity extends Component {
 
             this._showPicker();
         }
+
+    }
+    //选择照片按钮点击
+    choosePic() {
+        if (this.state.editable) {
+
+            ImagePicker.showImagePicker(options, (response) => {
+                console.log('Response = ', response);
+
+                if (response.didCancel) {
+                    console.log('用户取消了选择！');
+                }
+                else if (response.error) {
+                    alert("ImagePicker发生错误：" + response.error);
+                }
+                else if (response.customButton) {
+                    alert("自定义按钮点击：" + response.customButton);
+                }
+                else {
+                    let source = { path: response.path };
+                    // alert(source.path);
+                    var path = 'file://' + source.path;
+                    var startTime = new Date().getTime();
+                    this.setState({
+                        show: true
+
+                    })
+                    this.uploadImage(UPLOAD_URL, path, startTime + '.' + this.getFileType(path));
+                }
+
+            });
+        }
+    }
+    /**
+     * 获取文件后缀名
+     * @param {*} fileName 
+     */
+    getFileType(fileName) {
+        var type = fileName.substring(fileName.lastIndexOf('.') + 1);
+        return type;
+    }
+
+    /**
+     * 上传图片
+     * @param {*} url 
+     * @param {*} path 
+     * @param {*} name 
+     */
+    uploadImage(url, path, name) {
+        var that = this;
+        NetUitl.uploadImage(url, path, name, function (set) {
+            //下面的就是请求来的数据
+
+            if (null != set && null != set.return_code && set.return_code == '0') {
+
+                that.setState({
+
+                    show: false,
+                    headimg: path,
+                    image_path: set.result.filepath
+
+                })
+                ToastAndroid.show(set.msg, ToastAndroid.SHORT);
+            } else {
+                ToastAndroid.show(set.msg, ToastAndroid.SHORT);
+                that.setState({
+                    show: false
+                });
+
+            }
+
+        })
+
 
     }
     _backOnclick() {
@@ -235,7 +325,7 @@ export default class EditConsumerActivity extends Component {
         })
         StringBufferUtils.init();
         StringBufferUtils.append('userid=' + Global.userId);
-        // StringBufferUtils.append('&headimg=' + imageUrl);
+        StringBufferUtils.append('&headimg=' + this.state.image_path);
         StringBufferUtils.append('&usertype=' + this.props.userType);
         StringBufferUtils.append('&realname=' + realname);
         StringBufferUtils.append('&certificatetype=' + cerType);
@@ -253,11 +343,12 @@ export default class EditConsumerActivity extends Component {
     fetchData(param) {
         //get请求,以百度为例,没有参数,没有header
         var that = this;
-        NetUitl.post(EDITINFO_URL, param,'', function (set) {
+        NetUitl.post(EDITINFO_URL, param, '', function (set) {
             //下面的就是请求来的数据
 
             if (null != set && null != set.return_code && set.return_code == '0') {
-                Global.userIcon = imageUrl;
+                Global.userIcon = that.state.image_path;
+                alert(Global.userIcon);
                 that.setState({
 
                     show: false
@@ -360,7 +451,7 @@ export default class EditConsumerActivity extends Component {
         var place = result.province + ' ' + result.city;
         var cerType = this._getCerType(result.certificatetype);
         this.setState({
-            headimg: imageUrl,
+            headimg: result.headimg,
             realName: result.realname,
             credentials: cerType,
             areal: place,
@@ -374,13 +465,15 @@ export default class EditConsumerActivity extends Component {
             provinceId: result.provinceid,
             cityId: result.cityid,
             phone: result.phone,
-            editable: false
+            editable: false,
+            image_path: result.headimg
 
         })
 
 
 
     }
+
 
     pushDetails() {
         var cityEntity = this.refs.cPicker.passMenthod();
@@ -526,6 +619,7 @@ export default class EditConsumerActivity extends Component {
         return (
 
             <View style={styles.page}>
+                {this.state.show == true ? (<LoadView />) : (null)}
                 <View style={styles.container}>
                     <StatusBar
                         animated={true}
@@ -554,12 +648,14 @@ export default class EditConsumerActivity extends Component {
                 <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: '#ffffff', height: 45 }} >
 
                     <Text style={{ color: '#666666', width: 60, textAlign: 'left', marginLeft: 10 }}>{logo_txt}</Text>
-                    <View style={{ flex: 1, flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'flex-end', marginRight: 10 }}>
+                    <TouchableNativeFeedback onPress={() => this.choosePic()} >
+                        <View style={{ flex: 1, flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'flex-end', marginRight: 10 }}>
 
-                        <Image style={{
-                            width: 40, height: 40, borderRadius: 50
-                        }} source={{ uri: this.state.headimg }} />
-                    </View>
+                            <Image style={{
+                                width: 40, height: 40, borderRadius: 120, resizeMode: 'contain'
+                            }} source={{ uri: this.state.headimg }} />
+                        </View>
+                    </TouchableNativeFeedback>
 
                 </View>
                 <View style={{ height: 1, backgroundColor: '#e2e2e2', marginLeft: 10, marginRight: 10 }}></View>

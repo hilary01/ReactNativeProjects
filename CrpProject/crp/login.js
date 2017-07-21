@@ -158,6 +158,7 @@ export default class LoginInput extends Component {
                 if (error) {
                     alert('存值失败:', error);
                 } else {
+                    Global.UserInfos=JSON.parse(value);
 
                 }
             }

@@ -23,6 +23,7 @@ import Global from './global';
 import MyCopyright from './mycopyright';
 import CerManager from './cermanager';
 import Consumer from './consumer';
+import SetActivity from './setting';
 import StringUtil from './StringUtil';
 import CommonDialog from 'react-native-dialogs-master';
 var Dimensions = require('Dimensions');
@@ -35,20 +36,11 @@ export default class MyContact extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            UserInfos: {}
+            // UserInfos: {}
 
         }
 
     }
-    componentDidMount() {
-
-        this.getUserInfo();
-
-
-
-    }
-
-
     _onclickBtn(flag) {
 
         switch (flag) {
@@ -61,6 +53,9 @@ export default class MyContact extends Component {
             case '3'://个人资料
                 this.gotoActivity(Consumer);
                 break;
+            case '4'://设置
+                this.gotoActivity(SetActivity);
+                break;
 
         }
     }
@@ -72,7 +67,7 @@ export default class MyContact extends Component {
                     that.props.navigator.push({
                         component: Activity,
                         params: {
-                            userType: this.state.UserInfos.usertype
+                            userType: Global.UserInfos.usertype
 
                         }
                     })
@@ -103,7 +98,7 @@ export default class MyContact extends Component {
         this.props.navigator.push({
             component: CompletActivity,
             params: {
-                userType: this.state.UserInfos.usertype
+                userType: Global.UserInfos.usertype
             }
         })
 
@@ -208,7 +203,7 @@ export default class MyContact extends Component {
     isBindEmail() {
 
         var isBind = false;
-        var userEntity = this.state.UserInfos;
+        var userEntity = Global.UserInfos;
         // alert(JSON.stringify(userEntity));
         // alert('isapproved='+userEntity.isapproved);
         if (null != userEntity && StringUtil.isNotEmpty(userEntity.isapproved) && "1" ==
@@ -232,7 +227,7 @@ export default class MyContact extends Component {
     isComplet() {
 
         var isComp = false;
-        var userEntity = this.state.UserInfos;
+        var userEntity = Global.UserInfos;
         // alert('isdetail=' + userEntity.isdetail);
         if (null != userEntity && StringUtil.isNotEmpty(userEntity.isdetail) && "1" ==
             userEntity.isdetail) {
@@ -244,29 +239,6 @@ export default class MyContact extends Component {
         }
         return isComp;
 
-
-    }
-    //获取用户信息
-    getUserInfo() {
-
-        AsyncStorage.getItem(
-            'user_info_key',
-            (error, result) => {
-                if (error) {
-                    alert('取值失败:' + error);
-                } else {
-                    const jsonValue = JSON.parse(result);
-                    if (null != jsonValue) {
-                        this.setState({
-
-                            UserInfos: jsonValue
-
-                        })
-                    }
-
-                }
-            }
-        )
 
     }
     /**
@@ -350,7 +322,7 @@ export default class MyContact extends Component {
                 {/*设置*/}
                 <View style={{ flexDirection: 'row', height: 48, marginTop: 10, backgroundColor: '#ffffff', alignItems: 'center' }}>
 
-                    <TouchableNativeFeedback>
+                    <TouchableNativeFeedback onPress={() => this._onclickBtn('4')}>
                         <View style={{ flexDirection: 'row', alignItems: 'center' }} >
 
                             <View style={{ flexDirection: 'row', justifyContent: 'flex-start', width: 160, alignItems: 'center', marginLeft: 10, flex: 1, height: 48 }}>
@@ -400,7 +372,9 @@ const styles = StyleSheet.create({
 
         height: 74,
         width: 74,
-        borderRadius: 50
+        borderRadius: 120,
+        resizeMode: 'contain'
+
 
 
     }, comBtnBtnView: {

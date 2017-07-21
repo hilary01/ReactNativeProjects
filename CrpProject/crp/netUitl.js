@@ -134,7 +134,26 @@ export default class NetUitl extends React.Component {
                 ToastAndroid.show('服务器异常，请稍后再试！', ToastAndroid.SHORT);
             }).done();
     }
+    static uploadImage(url, path, fileName, callback) {
+        let formData = new FormData();
+        let file = { uri: path, type: 'multipart/form-data', name: fileName };
 
+        formData.append("upfile", file);
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+            body: formData,
+        })
+            .then((response) => response.json())
+            .then((responseData) => {
+
+                callback(responseData);
+            })
+            .catch((error) => { callback(error); }).done();;
+
+    }
     // let params = {'start':'0',limit:'20','isNeedCategory': true, 'lastRefreshTime': '2016-09-25 09:45:12'};
     //     NetUitl.post('http://www.pintasty.cn/home/homedynamic',params,'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJVLTliZGJhNjBjMjZiMDQwZGJiMTMwYWRhYWVlN2FkYTg2IiwiZXhwaXJhdGlvblRpbWUiOjE0NzUxMTg4ODU4NTd9.ImbjXRFYDNYFPtK2_Q2jffb2rc5DhTZSZopHG_DAuNU',function (set) {
     //         //下面的就是请求来的数据

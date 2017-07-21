@@ -43,7 +43,7 @@ export default class ResetActivity extends Component {
         var pass_word = this.state.passWord;
         var ok_pass = this.state.okPassWord;
         var old_pass = this.state.oldpass;
-         if (!StringUtil.isNotEmpty(old_pass) || old_pass.length < 5) {
+        if (!StringUtil.isNotEmpty(old_pass) || old_pass.length < 5) {
 
             ToastAndroid.show('请输入6-12位旧密码', ToastAndroid.SHORT);
             return;
@@ -66,7 +66,7 @@ export default class ResetActivity extends Component {
         StringBufferUtils.init();
         StringBufferUtils.append('type=' + '2');
         StringBufferUtils.append('&&password=' + pass_word);
-        StringBufferUtils.append('&&userid=' + Global.userName);
+        StringBufferUtils.append('&&userid=' + Global.userId);
         StringBufferUtils.append('&&conpassword=' + ok_pass);
         StringBufferUtils.append('&&oldpass=' + old_pass);
 
@@ -75,6 +75,22 @@ export default class ResetActivity extends Component {
 
 
     }
+    //保存用户信息
+    saveUserNameData(value) {
+        var json = JSON.stringify(value);
+
+        AsyncStorage.removeItem('user_name_key');
+        AsyncStorage.setItem(
+            'user_name_key',
+            json,
+            (error) => {
+                if (error) {
+                    alert('存值失败:', error);
+                } else {
+                }
+            }
+        );
+    }
     fetchData(param) {
         //get请求,以百度为例,没有参数,没有header
         var that = this;
@@ -82,6 +98,11 @@ export default class ResetActivity extends Component {
 
             //下面的就是请求来的数据
             if (null != set && null != set.return_code && set.return_code == '0') {
+                var userEntity = new Object();
+                userEntity.userName = Global.userName;
+                userEntity.passWord = that.state.okPassWord;
+                userEntity.userId = Global.userId;
+                that.saveUserNameData(userEntity);
                 that.setState({
 
                     show: false
