@@ -179,7 +179,7 @@ export default class CerManagerActivity extends Component {
             <View style={{ height: 110, justifyContent: 'center', marginTop: 1, backgroundColor: 'white' }}>
                 <TouchableNativeFeedback onPress={() => this.clickItem(itemData, index)}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Image style={{ width: 60, height: 60, marginLeft: 10 }} source={itemData.thumbpath}></Image>
+                        <Image style={{ width: 60, height: 60, marginLeft: 10 }} source={{uri:itemData.thumbpath}}></Image>
                         <View style={{ height: 90, flexDirection: 'column', justifyContent: 'center', flex: 1 }}>
                             <Text style={styles.rule_item_title} numberOfLines={2}>{itemData.name}</Text>
                             <Text style={styles.rule_item_time}>{itemData.realname}</Text>
@@ -235,7 +235,7 @@ export default class CerManagerActivity extends Component {
                 <SwRefreshListView
                     dataSource={this.state.dataSource}
                     ref="listView"
-                    renderRow={this._renderSearchItem}
+                    renderRow={this._renderSearchItem()}
                     onRefresh={this._onListRefersh.bind(this)}//设置下拉刷新的方法 传递参数end函数 当刷新操作结束时 */
                     onLoadMore={this._onLoadMore.bind(this)} //设置上拉加载执行的方法 传递参数end函数 
                     isShowLoadMore={this.state.isLoadMore}

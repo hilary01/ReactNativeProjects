@@ -63,7 +63,16 @@ export default class NoticeActivity extends Component {
 
 
     }
+    componentWillUnmount() {
+        toplist.length = 0;
+        pageNum = 1;
+        totalPage = 0;
+        this.setState({
+            topList: {}
 
+        })
+
+    }
     initTopMenu() {
 
 
