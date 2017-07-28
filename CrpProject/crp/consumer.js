@@ -348,7 +348,6 @@ export default class EditConsumerActivity extends Component {
 
             if (null != set && null != set.return_code && set.return_code == '0') {
                 Global.userIcon = that.state.image_path;
-                alert(Global.userIcon);
                 that.setState({
 
                     show: false
@@ -652,7 +651,7 @@ export default class EditConsumerActivity extends Component {
                         <View style={{ flex: 1, flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'flex-end', marginRight: 10 }}>
 
                             <Image style={{
-                                width: 40, height: 40, borderRadius: 120, resizeMode: 'contain'
+                                width: 40, height: 40, borderRadius:80, 
                             }} source={{ uri: this.state.headimg }} />
                         </View>
                     </TouchableNativeFeedback>

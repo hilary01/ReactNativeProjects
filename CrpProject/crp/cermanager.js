@@ -174,32 +174,34 @@ export default class CerManagerActivity extends Component {
     }
     // 返回国内法规Item
     _renderSearchItem = (itemData, index) => {
-        var types = this._getType(itemData.category);
-        return (
-            <View style={{ height: 110, justifyContent: 'center', marginTop: 1, backgroundColor: 'white' }}>
-                <TouchableNativeFeedback onPress={() => this.clickItem(itemData, index)}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Image style={{ width: 60, height: 60, marginLeft: 10 }} source={{uri:itemData.thumbpath}}></Image>
-                        <View style={{ height: 90, flexDirection: 'column', justifyContent: 'center', flex: 1 }}>
-                            <Text style={styles.rule_item_title} numberOfLines={2}>{itemData.name}</Text>
-                            <Text style={styles.rule_item_time}>{itemData.realname}</Text>
-                            <Text style={styles.rule_item_time}>{itemData.certificatenumber}</Text>
+        if (null != itemData) {
+            var types = this._getType(itemData.category);
+            return (
+                <View style={{ height: 110, justifyContent: 'center', marginTop: 1, backgroundColor: 'white' }}>
+                    <TouchableNativeFeedback onPress={() => this.clickItem(itemData, index)}>
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <Image style={{ width: 60, height: 60, marginLeft: 10 }} source={{ uri: itemData.thumbpath }}></Image>
+                            <View style={{ height: 90, flexDirection: 'column', justifyContent: 'center', flex: 1 }}>
+                                <Text style={styles.rule_item_title} numberOfLines={2}>{itemData.name}</Text>
+                                <Text style={styles.rule_item_time}>{itemData.realname}</Text>
+                                <Text style={styles.rule_item_time}>{itemData.certificatenumber}</Text>
 
-                        </View>
-                        <View style={{ height: 90 }}>
-                            <View style={{ flexDirection: 'row', marginTop: 20, marginRight: 10 }}>
+                            </View>
+                            <View style={{ height: 90 }}>
+                                <View style={{ flexDirection: 'row', marginTop: 20, marginRight: 10 }}>
 
-                                <Image style={{ width: 16, height: 16, marginLeft: 20 }} source={TYPE_ICON} />
-                                <Text style={{ textAlign: 'center', color: '#999999', fontSize: 13, marginLeft: 5 }}>{types}</Text>
+                                    <Image style={{ width: 16, height: 16, marginLeft: 20 }} source={TYPE_ICON} />
+                                    <Text style={{ textAlign: 'center', color: '#999999', fontSize: 13, marginLeft: 5 }}>{types}</Text>
+                                </View>
+
                             </View>
 
+
                         </View>
-
-
-                    </View>
-                </TouchableNativeFeedback>
-            </View>
-        );
+                    </TouchableNativeFeedback>
+                </View>
+            );
+        }
     }
     _separator = () => {
         return <View style={{ height: 1, backgroundColor: '#e2e2e2' }} />;
@@ -215,7 +217,13 @@ export default class CerManagerActivity extends Component {
     }
     //点击列表点击每一行
     clickItem(item, index) {
-        ToastAndroid.show('抱歉由于版权局权限原因，暂不支持点击', ToastAndroid.SHORT);
+        this.props.navigator.push({
+            component: CerDetail,
+            params: {
+                rootUrl: 'http://mil.news.sina.com.cn/china/2017-07-25/doc-ifyihrmf3361411.shtml'
+
+            }
+        })
     }
     //此函数用于为给定的item生成一个不重复的key
     _keyExtractor = (item, index) => item.key;

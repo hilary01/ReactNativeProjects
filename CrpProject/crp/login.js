@@ -9,7 +9,8 @@ import {
     Image,
     TouchableNativeFeedback,
     StatusBar,
-    AsyncStorage
+    AsyncStorage,
+    Dimensions
 } from 'react-native';
 const USER_ICON = require('./images/tabs/user_icon.png');
 const PASSWORD_ICON = require('./images/tabs/icon_pass.png');
@@ -24,8 +25,9 @@ import NetUitl from './netUitl';
 import StringBufferUtils from './StringBufferUtil';
 import DeviceStorage from './deviceStorage';
 import Global from './global';
-import RegistActivity from './regist'
-import VailEmainActivity from './vail_email'
+import RegistActivity from './regist';
+import VailEmainActivity from './vail_email';
+var ScreenWidth = Dimensions.get('window').width;
 export default class LoginInput extends Component {
     constructor(props) {
         super(props);
@@ -266,7 +268,7 @@ export default class LoginInput extends Component {
                         />
                         <Image style={{ width: 16, height: 16, marginLeft: 30, position: 'absolute' }} source={PASSWORD_ICON} />
                         <TouchableNativeFeedback onPress={() => this._showPassBtn()}>
-                            <View style={{ width: 25, height: 25, flexDirection: 'row', justifyContent: 'center', position: 'absolute', marginLeft: 310, alignItems: 'center' }}>
+                            <View style={{ width: 25, height: 25, flexDirection: 'row', justifyContent: 'center', position: 'absolute', marginLeft: ScreenWidth-45, alignItems: 'center' }}>
 
                                 <Image style={{ width: 16, height: 16 }} source={(this.state.ishow_pass == true) ? (DISSHOW_ICON) : (SHOWPASS_ICON)} />
 

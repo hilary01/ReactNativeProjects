@@ -11,7 +11,8 @@ import {
     TouchableNativeFeedback,
     Image,
     InteractionManager,
-    FlatList
+    FlatList,
+    ToastAndroid
 } from 'react-native';
 import { SwipeListView, SwipeRow } from 'react-native-swipe-list-view';
 import LoadingMore from './loadmore';
@@ -21,6 +22,7 @@ import LoadView from './loading';
 import NetUitl from './netUitl';
 import StringBufferUtils from './StringBufferUtil';
 var SEARCH_URL = 'http://drmlum.rdgchina.com/drmapp/copyright/list';
+var DELETE_URL = 'http://drmlum.rdgchina.com/drmapp/copyright/delete';
 import Global from './global';
 import PublicTitle from './public_title';
 var BACK_ICON = require('./images/tabs/nav_return.png');
@@ -33,6 +35,11 @@ var menuId = ['0', '1', '2', '3', '4'];
 var toplist = new Array();
 import Dimensions from 'Dimensions';
 var screenW = Dimensions.get('window').width;
+import CopyRightDetail from './copyright_detail';
+var RETURN_ICON = require('./images/tabs/icon_return.png');
+var SHENPI_ICON = require('./images/tabs/icon_already.png');
+var SHENPING_ICON = require('./images/tabs/icon_in.png');
+var WTJ_ICON = require('./images/tabs/icon_not.png');
 export default class MyCopyrightActivity extends Component {
 
     constructor(props) {
@@ -63,9 +70,27 @@ export default class MyCopyrightActivity extends Component {
         })
 
     }
+    _getStateLayout(state) {
+        switch (state) {
+            case '1'://1已审批
+                return <Image style={{ height: 16, width: 16, marginLeft: 20 }} source={SHENPI_ICON} />;
+                break
+            case '2'://2审批中
+                return <Image style={{ height: 16, width: 16, marginLeft: 20 }} source={SHENPING_ICON} />;
+                break
+            case '3'://3未提交
+                return <Image style={{ height: 16, width: 16, marginLeft: 20 }} source={WTJ_ICON} />;
+                break
+            case '4'://4被驳回
+                return <Image style={{ height: 16, width: 16, marginLeft: 20 }} source={RETURN_ICON} />;
+                break
+
+        }
+
+    }
     initTopMenu() {
 
-
+        topList = [];
         for (var i = 0; i < menuName.length; i++) {
             var menu = new Object();
             menu.id = menuId[i];
@@ -204,20 +229,21 @@ export default class MyCopyrightActivity extends Component {
     deleteData(param, rowId) {
         //get请求,以百度为例,没有参数,没有header
         var that = this;
-
-        NetUitl.post(SEARCH_URL, param, '', function (set) {
+        NetUitl.post(DELETE_URL, param, '', function (set) {
             //下面的就是请求来的数据
-            alert(param);
             if (null != set && set.return_code == '0') {
-                const newData = [...this.state.dataSource];
-                newData.splice(rowId, 1);
+                var list = that._data;
+                //移除列表中下标为index的项
+                delete list[rowId];
+                //更新列表的状态
+                that._data = list;
                 that.setState({
-                    show: false,
-                    dataSource: newData
+                    dataSource: that.state.dataSource.cloneWithRows(list),
+                    show: false
                 });
                 ToastAndroid.show(set.msg, ToastAndroid.SHORT);
-
             } else {
+                ToastAndroid.show(set.msg, ToastAndroid.SHORT);
                 that.setState({
                     show: false
                 });
@@ -383,7 +409,13 @@ export default class MyCopyrightActivity extends Component {
     }
     //点击列表点击每一行
     clickItem(item) {
-        alert(item.id);
+        this.props.navigator.push({
+            component: CopyRightDetail,
+            params: {
+                detail_id: item.id
+
+            }
+        })
     }
     _renderTopItem = (itemData, index) => {
         return <TouchableOpacity key={index} activeOpacity={1} onPress={() => this.selectMenu(itemData, index)}>
@@ -468,7 +500,7 @@ export default class MyCopyrightActivity extends Component {
                         <View style={{ height: 90 }}>
                             <View style={{ flexDirection: 'row', marginTop: 20, marginRight: 10 }}>
 
-                                <Image style={{ width: 16, height: 16, marginLeft: 20 }} source={TYPE_ICON} />
+                                {this._getStateLayout(itemData.examinestatus)}
                                 <Text style={{ textAlign: 'center', color: '#999999', fontSize: 13, marginLeft: 5 }}>{status}</Text>
                             </View>
 

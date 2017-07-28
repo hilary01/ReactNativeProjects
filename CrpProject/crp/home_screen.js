@@ -27,6 +27,7 @@ import NetUitl from './netUitl';
 import NoticeActivity from './notice_list';
 import LawActivity from './law_rule';
 import NewsActivity from './news_list';
+var ScreenWidth = Dimensions.get('window').width;
 export default class TopScreen extends Component {
     constructor(props) {
         super(props);
@@ -222,7 +223,7 @@ export default class TopScreen extends Component {
     _renderNoticeItem = (itemData, index) => {
         var types = this._getType(itemData.item.category);
         return (
-            <View style={{ height: 120, width: 180, justifyContent: 'center', backgroundColor: '#F6F9FF' }}>
+            <View style={{ height: 120, width: ScreenWidth/2-10, justifyContent: 'center', backgroundColor: '#F6F9FF' }}>
                 <TouchableNativeFeedback onPress={this.showToast}>
                     {this._makeGridView(itemData, types)}
                 </TouchableNativeFeedback>
@@ -237,11 +238,11 @@ export default class TopScreen extends Component {
         if (itemData.index % 2 == 0) {
 
 
-            return <View style={{ height: 120, width: 175, flexDirection: 'row', justifyContent: 'center', marginLeft: 5 }}>
+            return <View style={{ height: 120, width: ScreenWidth/2-20, flexDirection: 'row', justifyContent: 'center', marginLeft: 5 }}>
 
 
 
-                <View style={{ height: 120, width: 173, flexDirection: 'column', justifyContent: 'center' }}>
+                <View style={{ height: 120, width: ScreenWidth/2-20, flexDirection: 'column', justifyContent: 'center' }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <Image style={{ width: 5, height: 5, marginLeft: 5 }} source={POINT_ICONS}></Image>
                         <Text style={styles.notice_type_txt} numberOfLines={1}>{types}</Text>
@@ -261,7 +262,7 @@ export default class TopScreen extends Component {
 
         } else {
 
-            return <View style={{ height: 120, width: 175, flexDirection: 'column', justifyContent: 'center', marginLeft: 5 }}>
+            return <View style={{ height: 120, width: ScreenWidth/2-20, flexDirection: 'column', justifyContent: 'center', marginLeft: 5 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <Image style={{ width: 5, height: 5, marginLeft: 5 }} source={POINT_ICONS}></Image>
                     <Text style={styles.notice_type_txt} numberOfLines={1}>{types}</Text>

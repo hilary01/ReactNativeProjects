@@ -28,8 +28,9 @@ import StringUtil from './StringUtil';
 import CommonDialog from 'react-native-dialogs-master';
 var Dimensions = require('Dimensions');
 var ScreenWidth = Dimensions.get('window').width;
-import CompletActivity from './complet_info'
-import BindEmail from './bind_email'
+import CompletActivity from './complet_info';
+import BindEmail from './bind_email';
+import CerDetail from './cerdetail';
 export default class MyContact extends Component {
 
     // 构造
@@ -105,12 +106,6 @@ export default class MyContact extends Component {
     }
     //跳往绑定邮箱
     bindBtn() {
-        //    this.props.navigator.push({
-        //     component: CompletActivity,
-        //     params: {
-        //         userType: this.state.UserInfos.usertype
-        //     }
-        // })
         this.props.navigator.push({
             component: BindEmail,
             params: {
@@ -275,6 +270,7 @@ export default class MyContact extends Component {
                     <Image style={styles.top_img} source={TOP_IMAGE}>
                         <TouchableNativeFeedback onPress={() => this._onclickBtn('3')}>
                             <View style={styles.header_view}>
+
                                 <Image style={styles.head_icon} source={((typeof Global.userIcon == 'undefined') || Global.userIcon == '') ? (DEFAULT_ICON) : { uri: Global.userIcon }} />
                                 <Text style={{ fontSize: 14, color: '#ffffff' }}>{((Global.isLogin == false) || (typeof Global.isLogin == 'undefined')) ? ('登录 / 注册') : Global.userName}</Text>
 
@@ -372,8 +368,8 @@ const styles = StyleSheet.create({
 
         height: 74,
         width: 74,
-        borderRadius: 120,
-        resizeMode: 'contain'
+        borderRadius: 100,
+
 
 
 
