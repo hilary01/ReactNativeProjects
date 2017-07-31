@@ -7,7 +7,8 @@ import {
     TouchableNativeFeedback,
     Image,
     FlatList,
-    ScrollView
+    ScrollView,
+    TextInput
 } from 'react-native';
 import Global from './global';
 import PublicTitle from './public_title';
@@ -15,16 +16,14 @@ import LoadView from './loading';
 import NetUitl from './netUitl';
 import StringUtil from './StringUtil';
 var BACK_ICON = require('./images/tabs/nav_return.png');
-var RETURN_ICON = require('./images/tabs/icon_return.png');
-var SHENPI_ICON = require('./images/tabs/icon_already.png');
-var SHENPING_ICON = require('./images/tabs/icon_in.png');
-var WTJ_ICON = require('./images/tabs/icon_not.png');
 import StringBufferUtils from './StringBufferUtil';
 var DETAIL_URL = 'http://drmlum.rdgchina.com/drmapp/copyright/detail';
-import CopyRightEdit from './copyright_edit';
+const ICON_MORE = require('./images/tabs/icon_more.png');
 var IMAGE_DEFAULT = require('./images/tabs/defalut_img.png');
+var ADD_IMG = require('./images/tabs/icon_addimg.png');
 // var powerName = ['发表权', '署名权', '修改权', '保护作品完整权', '复制权', '发行权',
 //     '出租权', '展览权', '表演权', '放映权', '广播权', '信息网络传播权', '摄制权', '改编权', '翻译权', '汇编权', '其他'];
+import { RadioGroup, RadioButton } from 'react-native-flexi-radio-button'
 export default class ApplyActivity extends Component {
     constructor(props) {
         super(props);
@@ -35,13 +34,51 @@ export default class ApplyActivity extends Component {
             detailEntity: {},
             loadEnd: true,
             copyrightpersons: {},
-            authorPersons: {}
+            authorPersons: {},
+            work_name: '',
+            real_name: '',
+            phone: '',
+            description: '',
+            report_state: '',
+            selectedIndex: 0,
+            show_pubaddress: false
 
 
         };
+        this.onSelect = this.onSelect.bind(this)
+    }
+    onSelect(index, value) {
+        if (value == '0') {
+
+            this.setState({
+
+                show_pubaddress: false
+            })
+        } else {
+            this.setState({
+
+                show_pubaddress: true
+            })
+
+        }
     }
     componentDidMount() {
-        this.getData(this.props.detail_id);
+        var data = this.props.detail_entity;
+        var index = parseInt(data.publishstatus);
+        var flag = data.publishstatus == '1' ? true : false;
+
+        this.setState({
+            detailEntity: data,
+            workList: data.storefile,
+            copyrightpersons: data.copyrightowner,
+            authorPersons: data.authors,
+            work_name: data.name,
+            real_name: data.realname,
+            phone: data.telephone,
+            description: data.creativedescription,
+            selectedIndex: index,
+            show_pubaddress: flag
+        })
     }
     _backOnclick() {
         this.props.navigator.pop(
@@ -51,95 +88,9 @@ export default class ApplyActivity extends Component {
         );
 
     }
-    getData(id) {
-        this.setState({
-            show: true
-        });
-        StringBufferUtils.init();
-        StringBufferUtils.append('id=' + id);
-        let params = StringBufferUtils.toString();
-        this.fetchData(params);
+    _addImage() {
 
-
-    }
-    fetchData(param) {
-        //get请求,以百度为例,没有参数,没有header
-        var that = this;
-        NetUitl.post(DETAIL_URL, param, '', function (set) {
-            // alert(JSON.stringify(set));
-            //下面的就是请求来的数据
-            if (null != set && set.return_code == '0') {
-                that.setState({
-                    detailEntity: set.result,
-                    workList: set.result.storefile,
-                    copyrightpersons: set.result.copyrightowner,
-                    authorPersons: set.result.authors
-
-                })
-            } else {
-                that.setState({
-                    show: false
-                });
-
-            }
-
-
-
-
-        })
-
-    }
-    /**
-     * 审批状态栏
-     * @param {*} state 
-     */
-    _getStateLayout(state) {
-
-        switch (state) {
-            case '1'://1已审批
-                return <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                    <Image style={{ height: 16, width: 16 }} source={SHENPI_ICON} />
-                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 10 }}>已审批</Text>
-                </View>
-
-                break
-            case '2'://2审批中
-                return <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                    <Image style={{ height: 16, width: 16 }} source={SHENPING_ICON} />
-                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 10 }}>审批中</Text>
-                </View>
-                break
-            case '3'://3未提交
-                return <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                    <Image style={{ height: 16, width: 16 }} source={WTJ_ICON} />
-                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 10 }}>未提交</Text>
-                </View>
-                break
-            case '4'://4被驳回
-                return <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                    <Image style={{ height: 16, width: 16 }} source={RETURN_ICON} />
-                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 10 }}>被驳回</Text>
-                </View>
-                break
-
-        }
-
-    }
-    /**
-     * 驳回理由
-     */
-    _returnLayout(state) {
-        if (state == '4') {
-            return <View>
-                <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 10 }}>驳回理由</Text>
-                <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
-                    <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, paddingRight: 5 }}>作品描述过于简单</Text>
-
-                </View>
-            </View>
-        }
-
-
+        alert('add_img');
     }
     _renderWorkItem = (itemData, index) => {
         return <View style={{ alignItems: 'center', justifyContent: 'flex-end', marginLeft: 10 }}>
@@ -196,13 +147,14 @@ export default class ApplyActivity extends Component {
      * @param {*} state 
      */
     _getPublishLayout(data) {
-        if (data.publishstatus == '1') {
+        if (this.state.show_pubaddress) {
             return <View>
                 <View>
                     <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
                         <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>首次发表日期</Text>
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                            <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 10 }}>{data.initilizepublisheddatetime}</Text>
+                            <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 5 }}>{data.initilizepublisheddatetime}</Text>
+                            <Image style={{ width: 14, height: 14, justifyContent: 'flex-end', marginRight: 10 }} source={ICON_MORE} />
                         </View>
 
                     </View>
@@ -212,9 +164,9 @@ export default class ApplyActivity extends Component {
                     <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
                         <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>首次发表地址</Text>
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                            <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 10 }}>{data.initilizepublishedsite}</Text>
+                            <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 5 }}>{data.initilizepublishedsite}</Text>
                         </View>
-
+                        <Image style={{ width: 14, height: 14, justifyContent: 'flex-end', marginRight: 10 }} source={ICON_MORE} />
                     </View>
                     <View style={{ height: 1, backgroundColor: '#e2e2e2', marginLeft: 10, marginRight: 10 }} />
                 </View>
@@ -334,44 +286,17 @@ export default class ApplyActivity extends Component {
 
     }
     _showRightBtn(state) {
-        if (state == '3' || state == '4') {
-
-
-            return <View style={styles.right_view} >
-                <Text style={{
-                    textAlign: 'center', width: 60, color: '#ffffff'
-                }} onPress={() => this._editInfo(state)}>
-                    修改
+        return <View style={styles.right_view} >
+            <Text style={{
+                textAlign: 'center', width: 60, color: '#ffffff'
+            }} onPress={() => this._editInfo(state)}>
+                保存
                         </Text>
-            </View>
-        } else if (state == '1') {
-
-            return <View style={styles.right_view} >
-                <Text style={{
-                    textAlign: 'center', width: 60, color: '#ffffff'
-                }} onPress={() => this._editInfo(state)}>
-                    证书
-                        </Text>
-            </View>
-        }
+        </View>
     }
     _editInfo(state) {
-        var that = this;
-        if (state == '3' || state == '4') {//跳转到编辑界面
 
-            that.props.navigator.push({
-                component: CopyRightEdit,
-                params: {
-                    detail_entity: that.state.detailEntity
-
-                }
-            })
-        } else {
-
-
-
-        }
-
+        alert('保存数据');
 
     }
     //此函数用于为给定的item生成一个不重复的key
@@ -402,39 +327,50 @@ export default class ApplyActivity extends Component {
                 </View>
                 <ScrollView>
                     <View style={{ flex: 1 }}>
-                        <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 10 }}>作品状态信息</Text>
-                        <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
-                            <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>当前状态</Text>
-                            {this._getStateLayout(this.state.detailEntity.status)}
-                        </View>
-
-                        {this._returnLayout(this.state.detailEntity.status)}
                         <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 10 }}>作品信息</Text>
                         <View style={{ backgroundColor: 'white', height: 80, flexDirection: 'row', alignItems: 'center' }}>
                             <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>上传作品</Text>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1, marginLeft: 60 }}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1, marginLeft: 40 }}>
 
                                 <FlatList
-                                    style={{ width: 100 }}
+                                    style={{ width: 140, marginRight: 5 }}
                                     ref={(flatList) => this._flatList = flatList}
                                     renderItem={this._renderWorkItem}
                                     horizontal={true}
                                     keyExtractor={this._keyExtractor}
                                     data={this.state.workList}>
                                 </FlatList>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <TouchableNativeFeedback onPress={() => this._addImage()} >
+                                        <Image style={{ width: 60, height: 60, marginRight: 5, marginLeft: 5 }} source={ADD_IMG} />
+                                    </TouchableNativeFeedback>
+                                    <Image style={{ width: 14, height: 14, justifyContent: 'flex-end', marginRight: 10 }} source={ICON_MORE} />
+
+                                </View>
 
                             </View>
                         </View>
+                        <View style={{ height: 1, backgroundColor: '#e2e2e2', marginLeft: 10, marginRight: 10 }} />
                         <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
                             <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>作品名称</Text>
                             <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                                <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 10 }}>{this.state.detailEntity.name}</Text>
+                                <TextInput
+                                    style={{ flex: 1, height: 36, backgroundColor: '#ffffff', textAlign: 'right', paddingRight: 10, paddingLeft: 10 }}
+                                    placeholder='请输入您的作品名称' placeholderTextColor='#999999' underlineColorAndroid='transparent'
+                                    onChangeText={(work_name) => this.setState({ work_name })}
+                                    value={this.state.work_name}
+                                />
                             </View>
                         </View>
                         <View>
                             <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 10 }}>作品说明</Text>
-                            <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
-                                <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, paddingRight: 5 }}>{this.state.detailEntity.creativedescription}</Text>
+                            <View style={{ backgroundColor: 'white', height: 80, flexDirection: 'row', }}>
+                                <TextInput
+                                    style={{ flex: 1, height: 80, backgroundColor: '#ffffff', paddingRight: 10, paddingLeft: 10, textAlign: 'left' }}
+                                    placeholder='请输入您的作品说明' placeholderTextColor='#999999' underlineColorAndroid='transparent'
+                                    onChangeText={(description) => this.setState({ description })} multiline={true}
+                                    value={this.state.description}
+                                />
 
                             </View>
                         </View>
@@ -459,7 +395,9 @@ export default class ApplyActivity extends Component {
                             <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
                                 <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>作品创作性质</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 10 }}>{this._getCreateTypeTxt(this.state.detailEntity.rightcreatetype)}</Text>
+                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 5 }}>{this._getCreateTypeTxt(this.state.detailEntity.rightcreatetype)}</Text>
+                                    <Image style={{ width: 14, height: 14, justifyContent: 'flex-end', marginRight: 10 }} source={ICON_MORE} />
+
                                 </View>
 
                             </View>
@@ -469,7 +407,8 @@ export default class ApplyActivity extends Component {
                             <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
                                 <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>创作/制作完成日期</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 10 }}>{this.state.detailEntity.finisheddatetime}</Text>
+                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 5 }}>{this.state.detailEntity.finisheddatetime}</Text>
+                                    <Image style={{ width: 14, height: 14, justifyContent: 'flex-end', marginRight: 10 }} source={ICON_MORE} />
                                 </View>
 
                             </View>
@@ -480,17 +419,31 @@ export default class ApplyActivity extends Component {
                             <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
                                 <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>创作/制作完成地址</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 10 }}>{this.state.detailEntity.finishedaddress}</Text>
+                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 5 }}>{this.state.detailEntity.finishedaddress}</Text>
+                                    <Image style={{ width: 14, height: 14, justifyContent: 'flex-end', marginRight: 10 }} source={ICON_MORE} />
                                 </View>
 
                             </View>
                             <View style={{ height: 1, backgroundColor: '#e2e2e2', marginLeft: 10, marginRight: 10 }} />
                         </View>
                         <View>
-                            <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
+                            <View style={{ backgroundColor: 'white', height: 80, flexDirection: 'row', alignItems: 'center' }}>
                                 <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>发表状态</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 10 }}>{this.state.detailEntity.publishstatus == '1' ? '已发表' : '未发表'}</Text>
+                                    <RadioGroup selectedIndex={this.state.selectedIndex}
+                                        onSelect={(index, value) => this.onSelect(index, value)}
+                                    >
+
+                                        <RadioButton value={'0'}  >
+                                            <Text>未发表</Text>
+                                        </RadioButton>
+                                        <RadioButton value={'1'} >
+                                            <Text>已发表</Text>
+                                        </RadioButton>
+
+
+
+                                    </RadioGroup>
                                 </View>
 
                             </View>
@@ -505,7 +458,12 @@ export default class ApplyActivity extends Component {
                             <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
                                 <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>姓名</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 10 }}>{this.state.detailEntity.realname}</Text>
+                                    <TextInput
+                                        style={{ flex: 1, height: 36, backgroundColor: '#ffffff', textAlign: 'right', paddingRight: 10, paddingLeft: 10 }}
+                                        placeholder='请输入您的真实名字' placeholderTextColor='#999999' underlineColorAndroid='transparent'
+                                        onChangeText={(real_name) => this.setState({ real_name })}
+                                        value={this.state.real_name}
+                                    />
                                 </View>
 
                             </View>
@@ -515,7 +473,12 @@ export default class ApplyActivity extends Component {
                             <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
                                 <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>联系方式</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 10 }}>{this.state.detailEntity.telephone}</Text>
+                                    <TextInput
+                                        style={{ flex: 1, height: 36, backgroundColor: '#ffffff', textAlign: 'right', paddingRight: 10, paddingLeft: 10 }}
+                                        placeholder='请输入您的手机号码' placeholderTextColor='#999999' underlineColorAndroid='transparent'
+                                        onChangeText={(phone) => this.setState({ phone })}
+                                        value={this.state.phone}
+                                    />
                                 </View>
 
                             </View>
@@ -528,7 +491,8 @@ export default class ApplyActivity extends Component {
                             <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
                                 <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>权利取得方式</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 10 }}>{this._getPowerGetTxt(this.state.detailEntity.rightgettype)}</Text>
+                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 5 }}>{this._getPowerGetTxt(this.state.detailEntity.rightgettype)}</Text>
+                                    <Image style={{ width: 14, height: 14, justifyContent: 'flex-end', marginRight: 10 }} source={ICON_MORE} />
                                 </View>
 
                             </View>
@@ -539,6 +503,7 @@ export default class ApplyActivity extends Component {
                                 <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>权利归属方式</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
                                     <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 10 }}>{this._getPowerOwnerTxt(this.state.detailEntity.righttoattributionway)}</Text>
+                                    <Image style={{ width: 14, height: 14, justifyContent: 'flex-end', marginRight: 10 }} source={ICON_MORE} />
                                 </View>
 
                             </View>
@@ -548,6 +513,7 @@ export default class ApplyActivity extends Component {
                                 <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>权利拥有状况</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
                                     <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 10 }}>{this._getPowerSize(this.state.detailEntity.righttoattributionstatuss)}</Text>
+                                    <Image style={{ width: 14, height: 14, justifyContent: 'flex-end', marginRight: 10 }} source={ICON_MORE} />
                                 </View>
 
                             </View>
@@ -557,7 +523,8 @@ export default class ApplyActivity extends Component {
                             <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
                                 <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>中国 山东省</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                                    <Text style={{ color: '#666666', paddingTop: 10, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 10 }}>{this.state.detailEntity.copyrightcityname}</Text>
+                                    <Text style={{ color: '#666666', paddingTop: 10, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 5 }}>{this.state.detailEntity.copyrightcityname}</Text>
+                                    <Image style={{ width: 14, height: 14, justifyContent: 'flex-end', marginRight: 10 }} source={ICON_MORE} />
                                 </View>
 
                             </View>
@@ -566,7 +533,7 @@ export default class ApplyActivity extends Component {
                     </View>
 
                 </ScrollView>
-            </View>
+            </View >
 
 
         );

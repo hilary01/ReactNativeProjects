@@ -61,7 +61,7 @@ export default class MyCopyrightActivity extends Component {
         this.getData(typeId);
     }
     componentWillUnmount() {
-        toplist.length = 0;
+        toplist = [];
         pageNum = 1;
         totalPage = 0;
         this.setState({
@@ -89,8 +89,8 @@ export default class MyCopyrightActivity extends Component {
 
     }
     initTopMenu() {
-
         topList = [];
+         toplist.length=0;
         for (var i = 0; i < menuName.length; i++) {
             var menu = new Object();
             menu.id = menuId[i];

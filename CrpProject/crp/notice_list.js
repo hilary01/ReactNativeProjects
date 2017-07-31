@@ -64,6 +64,7 @@ export default class NoticeActivity extends Component {
 
     }
     componentWillUnmount() {
+        toplist = [];
         toplist.length = 0;
         pageNum = 1;
         totalPage = 0;
@@ -75,7 +76,8 @@ export default class NoticeActivity extends Component {
     }
     initTopMenu() {
 
-
+        toplist = [];
+        toplist.length = 0;
         for (var i = 0; i < menuName.length; i++) {
             var menu = new Object();
             menu.id = menuId[i];
