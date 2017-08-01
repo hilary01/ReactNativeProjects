@@ -8,7 +8,8 @@ import {
     Image,
     FlatList,
     ScrollView,
-    TextInput
+    TextInput,
+      DatePickerAndroid
 } from 'react-native';
 import Global from './global';
 import PublicTitle from './public_title';
@@ -21,10 +22,13 @@ var DETAIL_URL = 'http://drmlum.rdgchina.com/drmapp/copyright/detail';
 const ICON_MORE = require('./images/tabs/icon_more.png');
 var IMAGE_DEFAULT = require('./images/tabs/defalut_img.png');
 var ADD_IMG = require('./images/tabs/icon_addimg.png');
+var RADIO_NORMAL = require('./images/tabs/icon_normal.png');
+var RADIO_AGREE = require('./images/tabs/icon_select.png');
 // var powerName = ['发表权', '署名权', '修改权', '保护作品完整权', '复制权', '发行权',
 //     '出租权', '展览权', '表演权', '放映权', '广播权', '信息网络传播权', '摄制权', '改编权', '翻译权', '汇编权', '其他'];
-import { RadioGroup, RadioButton } from 'react-native-flexi-radio-button'
-export default class ApplyActivity extends Component {
+import CityPicker from './city_picker';
+var ADD_AUTHOR = require('./images/tabs/add_icon.png');
+export default class CopyEditActivity extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -41,27 +45,48 @@ export default class ApplyActivity extends Component {
             description: '',
             report_state: '',
             selectedIndex: 0,
-            show_pubaddress: false
+            show_pubaddress: false,
+            show_city_picker: false,
+            finishedaddress: '',
+            countryId: '',
+            provinceId: '',
+            cityId: '',
+            initilizepublishedsite: '',
+            initilizepublisheddatetime: '',
+            status: '0',
+            show_time_picker:false,
+            presetDate: new Date(2016, 3, 5),
 
 
         };
-        this.onSelect = this.onSelect.bind(this)
     }
-    onSelect(index, value) {
-        if (value == '0') {
+replaceAll(s1,s2){ 
+return this.replace(new RegExp(s1,"gm"),s2); 
+}
 
-            this.setState({
+    //进行创建时间日期选择器
+  async showPicker(stateKey, options) {
+     var date=null;
+    var returnTime='';
+    try {
+      var newState = {};
+      const {action, year, month, day} = await DatePickerAndroid.open(options);      
+      if (action === DatePickerAndroid.dismissedAction) {
+      } else {
+        date = new Date(year, month, day);
+      }
+    var reg=/\\/g;
+    var time = date.toLocaleDateString();
+    returnTime=time.replace(reg, "-");
+    alert(returnTime);
+    //     this.setState({
 
-                show_pubaddress: false
-            })
-        } else {
-            this.setState({
-
-                show_pubaddress: true
-            })
-
-        }
-    }
+    //    initilizepublisheddatetime:time
+    //     })
+    } catch ({code, message}) {
+      console.warn(`Error in example '${stateKey}': `, message);
+    }
+  }
     componentDidMount() {
         var data = this.props.detail_entity;
         var index = parseInt(data.publishstatus);
@@ -77,7 +102,14 @@ export default class ApplyActivity extends Component {
             phone: data.telephone,
             description: data.creativedescription,
             selectedIndex: index,
-            show_pubaddress: flag
+            show_pubaddress: flag,
+            finishedaddress: data.finishedaddress,
+            provinceId: data.provinceid,
+            countryId: data.countryid,
+            cityId: data.cityid,
+            initilizepublishedsite: data.initilizepublishedsite,
+            initilizepublisheddatetime: data.initilizepublisheddatetime,
+
         })
     }
     _backOnclick() {
@@ -140,7 +172,65 @@ export default class ApplyActivity extends Component {
 
     }
 
+    /**
+        * 选择城市
+        */
+    selectCity(state) {
+        this.setState({
 
+            show_city_picker: true,
+            status: state
+        })
+    }
+    /**
+     * 选择日期
+     */
+    selectDatePicker(){
+        this.setState({
+
+            show_time_picker: true,
+        })
+        
+    }
+
+    pushDetails(state) {
+        var cityEntity = this.refs.cPicker.passMenthod();
+        if (this.state.status == '0') {
+            var place = '中国 ' + cityEntity.province + ' ' + cityEntity.city;
+            this.setState({
+
+                show_city_picker: false,
+                provinceId: cityEntity.provinceid,
+                cityId: cityEntity.cityid,
+                countryId: '1',
+                finishedaddress: place
+
+            })
+        } else {
+            var place = '中国 ' + cityEntity.province
+            this.setState({
+
+                show_city_picker: false,
+                initilizepublishedsite: place
+
+            })
+        }
+    }
+
+     pushTimeDetails() {
+      this.setState({
+
+            show_time_picker: false,
+        })
+    }
+    /**
+     * 添加著作权人
+     */
+    _addPerson(state) {
+
+        alert(state);
+
+    }
 
     /**
      * 未发表不显示首次发表地址等
@@ -153,7 +243,7 @@ export default class ApplyActivity extends Component {
                     <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
                         <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>首次发表日期</Text>
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                            <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 5 }}>{data.initilizepublisheddatetime}</Text>
+                            <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 5 }} onPress={()=>{this.showPicker('preset', {date: this.state.presetDate})}}>{this.state.initilizepublisheddatetime}</Text>
                             <Image style={{ width: 14, height: 14, justifyContent: 'flex-end', marginRight: 10 }} source={ICON_MORE} />
                         </View>
 
@@ -164,7 +254,7 @@ export default class ApplyActivity extends Component {
                     <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
                         <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>首次发表地址</Text>
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                            <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 5 }}>{data.initilizepublishedsite}</Text>
+                            <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 5 }} onPress={() => this.selectCity('1')}>{this.state.initilizepublishedsite}</Text>
                         </View>
                         <Image style={{ width: 14, height: 14, justifyContent: 'flex-end', marginRight: 10 }} source={ICON_MORE} />
                     </View>
@@ -299,6 +389,51 @@ export default class ApplyActivity extends Component {
         alert('保存数据');
 
     }
+    /**
+     * 选择发表状态
+     * @param {*} state 
+     */
+    _changeRadioBtn(state) {
+        if (state == '0') {
+
+            this.setState({
+                selectedIndex: state,
+                show_pubaddress: false
+            })
+        } else {
+            this.setState({
+                selectedIndex: state,
+                show_pubaddress: true
+            })
+
+        }
+    }
+
+    /**
+     * 封装radioButton
+     */
+    _radioButton() {
+
+
+        return <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <TouchableNativeFeedback onPress={() => this._changeRadioBtn('0')} >
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 5, padding: 5 }}>
+                    <Image style={{ width: 16, height: 16 }} source={this.state.selectedIndex == '0' ? RADIO_AGREE : RADIO_NORMAL} />
+                    <Text style={{ marginLeft: 2 }}>未发表</Text>
+
+                </View>
+            </TouchableNativeFeedback>
+            <TouchableNativeFeedback onPress={() => this._changeRadioBtn('1')}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginRight: 10, padding: 5 }}>
+                    <Image style={{ width: 16, height: 16 }} source={this.state.selectedIndex == '1' ? RADIO_AGREE : RADIO_NORMAL} />
+                    <Text style={{ marginLeft: 2 }}>已发表</Text>
+
+                </View>
+            </TouchableNativeFeedback>
+
+        </View>
+
+    }
     //此函数用于为给定的item生成一个不重复的key
     _keyExtractor = (item, index) => item.key;
     render() {
@@ -374,16 +509,31 @@ export default class ApplyActivity extends Component {
 
                             </View>
                         </View>
-
                         <View>
-                            <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 10 }}>著作权人信息</Text>
+                            <View style={{ flexDirection: 'row' }}>
+                                <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, width: 120 }}>著作权人信息</Text>
+                                <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'flex-end', alignItems: 'center', paddingRight: 10 }}>
+
+                                    <Image style={{ width: 16, height: 16, marginRight: 5 }} source={ADD_AUTHOR} />
+                                    <Text onPress={() => this._addPerson('0')}>添加</Text>
+                                </View>
+
+                            </View>
                             <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
                                 <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, paddingRight: 5 }}>{this._getCopyrightPerson()}</Text>
 
                             </View>
                         </View>
                         <View>
-                            <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 10 }}>作者信息</Text>
+                            <View style={{ flexDirection: 'row' }}>
+                                <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, width: 120 }}>作者信息</Text>
+                                <View style={{ flexDirection: 'row', flex: 1, justifyContent: 'flex-end', alignItems: 'center', paddingRight: 10 }}>
+
+                                    <Image style={{ width: 16, height: 16, marginRight: 5 }} source={ADD_AUTHOR} />
+                                    <Text onPress={() => this._addPerson('1')}>添加</Text>
+                                </View>
+
+                            </View>
                             <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
                                 <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, paddingRight: 5 }}>{this._getAuthorPerson()}</Text>
 
@@ -419,7 +569,7 @@ export default class ApplyActivity extends Component {
                             <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
                                 <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>创作/制作完成地址</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 5 }}>{this.state.detailEntity.finishedaddress}</Text>
+                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 5 }} onPress={() => this.selectCity('0')}>{this.state.finishedaddress}</Text>
                                     <Image style={{ width: 14, height: 14, justifyContent: 'flex-end', marginRight: 10 }} source={ICON_MORE} />
                                 </View>
 
@@ -427,23 +577,10 @@ export default class ApplyActivity extends Component {
                             <View style={{ height: 1, backgroundColor: '#e2e2e2', marginLeft: 10, marginRight: 10 }} />
                         </View>
                         <View>
-                            <View style={{ backgroundColor: 'white', height: 80, flexDirection: 'row', alignItems: 'center' }}>
+                            <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
                                 <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>发表状态</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                                    <RadioGroup selectedIndex={this.state.selectedIndex}
-                                        onSelect={(index, value) => this.onSelect(index, value)}
-                                    >
-
-                                        <RadioButton value={'0'}  >
-                                            <Text>未发表</Text>
-                                        </RadioButton>
-                                        <RadioButton value={'1'} >
-                                            <Text>已发表</Text>
-                                        </RadioButton>
-
-
-
-                                    </RadioGroup>
+                                    {this._radioButton()}
                                 </View>
 
                             </View>
@@ -530,9 +667,10 @@ export default class ApplyActivity extends Component {
                             </View>
                             <View style={{ height: 1, backgroundColor: '#e2e2e2', marginLeft: 10, marginRight: 10 }} />
                         </View>
+                        <CityPicker visible={this.state.show_city_picker} callbackParent={() => this.pushDetails()} ref="cPicker" />
                     </View>
-
                 </ScrollView>
+
             </View >
 
 

@@ -130,7 +130,7 @@ export default class SomeScene extends Component {
 	}
 
 	createButon() {
-		return <View style={{ backgroundColor: '#f6f6f6', flexDirection: 'column', height: 45, alignItems: 'center', width: ScreenWidth, alignItems: 'center', }}>
+		return <View style={{ backgroundColor: '#f6f6f6', flexDirection: 'column', height: 45, alignItems: 'center', width: ScreenWidth, }}>
 
 			<View style={{ alignItems: 'center', flexDirection: 'column', justifyContent: 'center' }}>
 				<View style={{ height: 1, backgroundColor: '#e2e2e2', margin: 5, width: ScreenWidth }}></View>
