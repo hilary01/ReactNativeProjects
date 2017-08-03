@@ -9,7 +9,7 @@ import {
     FlatList,
     ScrollView,
     TextInput,
-      DatePickerAndroid
+    DatePickerAndroid
 } from 'react-native';
 import Global from './global';
 import PublicTitle from './public_title';
@@ -24,10 +24,14 @@ var IMAGE_DEFAULT = require('./images/tabs/defalut_img.png');
 var ADD_IMG = require('./images/tabs/icon_addimg.png');
 var RADIO_NORMAL = require('./images/tabs/icon_normal.png');
 var RADIO_AGREE = require('./images/tabs/icon_select.png');
-// var powerName = ['发表权', '署名权', '修改权', '保护作品完整权', '复制权', '发行权',
-//     '出租权', '展览权', '表演权', '放映权', '广播权', '信息网络传播权', '摄制权', '改编权', '翻译权', '汇编权', '其他'];
 import CityPicker from './city_picker';
 var ADD_AUTHOR = require('./images/tabs/add_icon.png');
+import CreateTypeActivity from './create_typelist';
+import PowerListActivity from './power_owner';
+import OrganizationActivity from './copyright_organization';
+var type_id = '';
+var organizationId = '';
+var calsh_list = [];
 export default class CopyEditActivity extends Component {
     constructor(props) {
         super(props);
@@ -54,44 +58,79 @@ export default class CopyEditActivity extends Component {
             initilizepublishedsite: '',
             initilizepublisheddatetime: '',
             status: '0',
-            show_time_picker:false,
-            presetDate: new Date(2016, 3, 5),
+            show_time_picker: false,
+            presetDate: new Date(),
+            rightcreatetype: '',
+            finisheddatetime: '',
+            rightgettype: '',
+            righttoattributionway: '',
+            righttoattributionstatuss: '',
+            copyrightcityname: ''
 
 
         };
     }
-replaceAll(s1,s2){ 
-return this.replace(new RegExp(s1,"gm"),s2); 
-}
 
     //进行创建时间日期选择器
-  async showPicker(stateKey, options) {
-     var date=null;
-    var returnTime='';
-    try {
-      var newState = {};
-      const {action, year, month, day} = await DatePickerAndroid.open(options);      
-      if (action === DatePickerAndroid.dismissedAction) {
-      } else {
-        date = new Date(year, month, day);
-      }
-    var reg=/\\/g;
-    var time = date.toLocaleDateString();
-    returnTime=time.replace(reg, "-");
-    alert(returnTime);
-    //     this.setState({
+    async showPicker(stateKey, options, state) {
+        var date = null;
+        var returnTime = '';
+        try {
+            var newState = {};
+            const { action, year, month, day } = await DatePickerAndroid.open(options);
+            if (action === DatePickerAndroid.dismissedAction) {
+            } else {
+                date = new Date(year, month, day);
+            }
+            var time = this._getFormatDate(year, (month + 1), day);
+            if (state == '0') {
 
-    //    initilizepublisheddatetime:time
-    //     })
-    } catch ({code, message}) {
-      console.warn(`Error in example '${stateKey}': `, message);
-    }
-  }
+                this.setState({
+
+                    initilizepublisheddatetime: time
+                })
+            } else {
+
+                this.setState({
+
+                    finisheddatetime: time
+                })
+            }
+
+        } catch ({ code, message }) {
+            console.warn(`Error in example '${stateKey}': `, message);
+        }
+    }
+    _getFormatDate(year, month, day) {
+
+        var date = '';
+        var _month = '';
+        var _day = '';
+        if (month < 10) {
+
+            _month = '0' + month;
+
+        } else {
+
+            _month = month;
+        }
+        if (day < 10) {
+
+            _day = '0' + day;
+
+        } else {
+
+            _day = day;
+        }
+        date = year + '-' + _month + '-' + _day;
+        return date;
+
+    }
     componentDidMount() {
         var data = this.props.detail_entity;
         var index = parseInt(data.publishstatus);
         var flag = data.publishstatus == '1' ? true : false;
-
+        organizationId = data.selectcopyrightcity
         this.setState({
             detailEntity: data,
             workList: data.storefile,
@@ -109,6 +148,12 @@ return this.replace(new RegExp(s1,"gm"),s2);
             cityId: data.cityid,
             initilizepublishedsite: data.initilizepublishedsite,
             initilizepublisheddatetime: data.initilizepublisheddatetime,
+            rightcreatetype: data.rightcreatetype,
+            finisheddatetime: data.finisheddatetime,
+            rightgettype: data.rightgettype,
+            righttoattributionway: data.righttoattributionway,
+            righttoattributionstatuss: data.righttoattributionstatuss,
+            copyrightcityname: data.copyrightcityname
 
         })
     }
@@ -185,12 +230,12 @@ return this.replace(new RegExp(s1,"gm"),s2);
     /**
      * 选择日期
      */
-    selectDatePicker(){
+    selectDatePicker() {
         this.setState({
 
             show_time_picker: true,
         })
-        
+
     }
 
     pushDetails(state) {
@@ -217,8 +262,8 @@ return this.replace(new RegExp(s1,"gm"),s2);
         }
     }
 
-     pushTimeDetails() {
-      this.setState({
+    pushTimeDetails() {
+        this.setState({
 
             show_time_picker: false,
         })
@@ -231,7 +276,145 @@ return this.replace(new RegExp(s1,"gm"),s2);
         alert(state);
 
     }
+    _getReturnData(reponseData, state) {
+        switch (state) {
 
+            case '0'://创作性质
+                this.setState({
+
+                    rightcreatetype: reponseData.id
+
+                })
+                break
+            case '1'://权利取得方式
+                this.setState({
+
+                    rightgettype: reponseData.id
+
+                })
+                break
+            case '2'://权利归属方式
+                this.setState({
+
+                    righttoattributionway: reponseData.id
+
+                })
+                break
+
+        }
+
+
+    }
+    _goCreateType(state) {
+        var createType = [];
+        var createTypeId = [];
+        var title = '';
+        switch (state) {
+            case '0'://创作性质
+                createType = ['原创', '改编', '翻译', '汇编', '注释', '整理', '其他'];
+                createTypeId = ['1', '2', '3', '4', '5', '6', '7'];
+                title = '创作性质';
+                type_id = this.state.rightcreatetype;
+                break
+            case '1'://权利取得方式
+                createType = ['原始', '继承', '承受', '其他'];
+                createTypeId = ['1', '2', '3', '4'];
+                title = '取得方式';
+                type_id = this.state.rightgettype;
+                break
+            case '2'://权利归属方式
+                createType = ['个人作品', '合作作品', '法人作品', '职务作品', '委托作品'];
+                createTypeId = ['1', '2', '3', '4', '5'];
+                title = '归属方式';
+                type_id = this.state.righttoattributionway;
+                break
+
+
+        }
+        this.props.navigator.push({
+            component: CreateTypeActivity,
+            params: {
+                title: title,
+                createType: createType,
+                createTypeId: createTypeId,
+                id: type_id,
+                returnData: (reponseData) => this._getReturnData(reponseData, state)
+
+            }
+        })
+    }
+    _getReturnPowerData(reponseData, selectLists) {
+        calsh_list = reponseData;
+        var right = this._getRightStatus(selectLists);
+        this.setState({
+
+            righttoattributionstatuss: right
+
+        })
+
+    }
+    _getRightStatus(list) {
+        var str = '';
+        if (list.length > 0) {
+            for (var i = 0; i < list.length; i++) {
+
+                if (i == list.length - 1) {
+
+                    str = str + list[i].id;
+                } else {
+                    str = str + list[i].id + ',';
+                }
+
+            }
+
+
+
+        }
+        return str;
+
+    }
+    _goPowerListActivity() {
+
+        var title = '拥有情况';
+        var lists = [];
+        if (calsh_list.length > 0) {
+
+            lists = calsh_list;
+        } else {
+
+        }
+        this.props.navigator.push({
+            component: PowerListActivity,
+            params: {
+                title: title,
+                list: lists,
+                returnData: (reponseData, selectLists) => this._getReturnPowerData(reponseData, selectLists)
+
+            }
+        })
+    }
+    _goOrganizationActivity() {
+
+        var title = '办理机构';
+        this.props.navigator.push({
+            component: OrganizationActivity,
+            params: {
+                title: title,
+                id: organizationId,
+                returnData: (reponseData) => this._getReturnOrganizationData(reponseData)
+
+            }
+        })
+    }
+    _getReturnOrganizationData(reponseData) {
+        organizationId = reponseData.id;
+        this.setState({
+
+            copyrightcityname: reponseData.name
+
+        })
+
+    }
     /**
      * 未发表不显示首次发表地址等
      * @param {*} state 
@@ -243,7 +426,7 @@ return this.replace(new RegExp(s1,"gm"),s2);
                     <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
                         <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>首次发表日期</Text>
                         <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                            <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 5 }} onPress={()=>{this.showPicker('preset', {date: this.state.presetDate})}}>{this.state.initilizepublisheddatetime}</Text>
+                            <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 5 }} onPress={() => { this.showPicker('preset', { date: this.state.presetDate }, '0') }}>{this.state.initilizepublisheddatetime}</Text>
                             <Image style={{ width: 14, height: 14, justifyContent: 'flex-end', marginRight: 10 }} source={ICON_MORE} />
                         </View>
 
@@ -545,7 +728,7 @@ return this.replace(new RegExp(s1,"gm"),s2);
                             <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
                                 <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>作品创作性质</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 5 }}>{this._getCreateTypeTxt(this.state.detailEntity.rightcreatetype)}</Text>
+                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 5 }} onPress={() => { this._goCreateType('0') }}>{this._getCreateTypeTxt(this.state.rightcreatetype)}</Text>
                                     <Image style={{ width: 14, height: 14, justifyContent: 'flex-end', marginRight: 10 }} source={ICON_MORE} />
 
                                 </View>
@@ -557,7 +740,7 @@ return this.replace(new RegExp(s1,"gm"),s2);
                             <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
                                 <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>创作/制作完成日期</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 5 }}>{this.state.detailEntity.finisheddatetime}</Text>
+                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 5 }} onPress={() => { this.showPicker('preset', { date: this.state.presetDate }, '1') }}>{this.state.finisheddatetime}</Text>
                                     <Image style={{ width: 14, height: 14, justifyContent: 'flex-end', marginRight: 10 }} source={ICON_MORE} />
                                 </View>
 
@@ -628,7 +811,7 @@ return this.replace(new RegExp(s1,"gm"),s2);
                             <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
                                 <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>权利取得方式</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 5 }}>{this._getPowerGetTxt(this.state.detailEntity.rightgettype)}</Text>
+                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 5 }} onPress={() => { this._goCreateType('1') }}>{this._getPowerGetTxt(this.state.rightgettype)}</Text>
                                     <Image style={{ width: 14, height: 14, justifyContent: 'flex-end', marginRight: 10 }} source={ICON_MORE} />
                                 </View>
 
@@ -639,7 +822,7 @@ return this.replace(new RegExp(s1,"gm"),s2);
                             <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
                                 <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>权利归属方式</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 10 }}>{this._getPowerOwnerTxt(this.state.detailEntity.righttoattributionway)}</Text>
+                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 10 }} onPress={() => { this._goCreateType('2') }}>{this._getPowerOwnerTxt(this.state.righttoattributionway)}</Text>
                                     <Image style={{ width: 14, height: 14, justifyContent: 'flex-end', marginRight: 10 }} source={ICON_MORE} />
                                 </View>
 
@@ -647,9 +830,9 @@ return this.replace(new RegExp(s1,"gm"),s2);
                         </View>
                         <View>
                             <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
-                                <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>权利拥有状况</Text>
+                                <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>权利拥有情况</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 10 }}>{this._getPowerSize(this.state.detailEntity.righttoattributionstatuss)}</Text>
+                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 10 }} onPress={() => { this._goPowerListActivity() }}>{this._getPowerSize(this.state.righttoattributionstatuss)}</Text>
                                     <Image style={{ width: 14, height: 14, justifyContent: 'flex-end', marginRight: 10 }} source={ICON_MORE} />
                                 </View>
 
@@ -659,8 +842,8 @@ return this.replace(new RegExp(s1,"gm"),s2);
                             <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 10 }}>选择办理机构</Text>
                             <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
                                 <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>中国 山东省</Text>
-                                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                                    <Text style={{ color: '#666666', paddingTop: 10, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 5 }}>{this.state.detailEntity.copyrightcityname}</Text>
+                                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1, alignItems: 'center' }}>
+                                    <Text style={{ color: '#666666', paddingTop: 10, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 5 }} onPress={() => { this._goOrganizationActivity() }}>{this.state.copyrightcityname}</Text>
                                     <Image style={{ width: 14, height: 14, justifyContent: 'flex-end', marginRight: 10 }} source={ICON_MORE} />
                                 </View>
 
