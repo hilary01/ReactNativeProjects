@@ -31,7 +31,7 @@ export default class ApplyActivity extends Component {
         this.state = {
             show: true,
             detailId: '',
-            workList: {},
+            workLists: {},
             detailEntity: {},
             loadEnd: true,
             copyrightpersons: {},
@@ -71,7 +71,7 @@ export default class ApplyActivity extends Component {
             if (null != set && set.return_code == '0') {
                 that.setState({
                     detailEntity: set.result,
-                    workList: set.result.storefile,
+                    workLists: set.result.storefile,
                     copyrightpersons: set.result.copyrightowner,
                     authorPersons: set.result.authors
 
@@ -416,11 +416,11 @@ export default class ApplyActivity extends Component {
 
                                 <FlatList
                                     style={{ width: 100 }}
-                                    ref={(flatList) => this._flatList = flatList}
+                                    ref={(flatLists) => this._flatLists = flatLists}
                                     renderItem={this._renderWorkItem}
                                     horizontal={true}
                                     keyExtractor={this._keyExtractor}
-                                    data={this.state.workList}>
+                                    data={this.state.workLists}>
                                 </FlatList>
 
                             </View>

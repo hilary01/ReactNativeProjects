@@ -9,7 +9,8 @@ import {
     FlatList,
     ScrollView,
     TextInput,
-    DatePickerAndroid
+    DatePickerAndroid,
+    ToastAndroid
 } from 'react-native';
 import Global from './global';
 import PublicTitle from './public_title';
@@ -32,6 +33,25 @@ import OrganizationActivity from './copyright_organization';
 var type_id = '';
 var organizationId = '';
 var calsh_list = [];
+var UPLOAD_URL = 'http://drmlum.rdgchina.com/drmapp/drmfile/upload';
+//图片选择器
+var ImagePicker = require('react-native-image-picker');
+//图片选择器参数设置
+var options = {
+    title: '请选择图片来源',
+    cancelButtonTitle: '取消',
+    takePhotoButtonTitle: '拍照',
+    chooseFromLibraryButtonTitle: '相册图片',
+    // customButtons: [
+    //     { name: 'hangge', title: 'hangge.com图片' },
+    // ],
+    storageOptions: {
+        skipBackup: true,
+        path: 'images'
+    }
+};
+import AddOuthorActivity from './add_author';
+import AddCopyPersonActivity from './add_copyperson';
 export default class CopyEditActivity extends Component {
     constructor(props) {
         super(props);
@@ -70,7 +90,86 @@ export default class CopyEditActivity extends Component {
 
         };
     }
+    /**
+    * 获取文件后缀名
+    * @param {*} fileName 
+    */
+    getFileType(fileName) {
+        var type = fileName.substring(fileName.lastIndexOf('.') + 1);
+        return type;
+    }
+    //选择照片按钮点击
+    choosePic() {
 
+        ImagePicker.showImagePicker(options, (response) => {
+            console.log('Response = ', response);
+
+            if (response.didCancel) {
+                console.log('用户取消了选择！');
+            }
+            else if (response.error) {
+                alert("ImagePicker发生错误：" + response.error);
+            }
+            else if (response.customButton) {
+                alert("自定义按钮点击：" + response.customButton);
+            }
+            else {
+                let source = { path: response.path };
+                // alert(source.path);
+                var path = 'file://' + source.path;
+                var startTime = new Date().getTime();
+                this.uploadImage(UPLOAD_URL, path, startTime + '.' + this.getFileType(path));
+            }
+
+        });
+    }
+    /**
+   * 上传图片
+   * @param {*} url 
+   * @param {*} path 
+   * @param {*} name 
+   */
+    uploadImage(url, path, name) {
+        var that = this;
+        this.setState({
+            show: true
+
+        })
+        NetUitl.uploadImage(url, path, name, function (set) {
+            //下面的就是请求来的数据
+
+            if (null != set && null != set.return_code && set.return_code == '0') {
+
+                that._updateWorks(set.result.filepath);
+                ToastAndroid.show(set.msg, ToastAndroid.SHORT);
+            } else {
+                ToastAndroid.show(set.msg, ToastAndroid.SHORT);
+                that.setState({
+                    show: false
+                });
+
+            }
+
+        })
+
+
+    }
+    _updateWorks(path) {
+        var list = this.state.workList;
+        if (StringUtil.isNotEmpty(path)) {
+            var obj = new Object();
+            obj.filetype = '1';
+            obj.storepath = path;
+            list.push(obj);
+            this.setState({
+                show: false,
+                workList: list
+
+            })
+        }
+
+
+    }
     //进行创建时间日期选择器
     async showPicker(stateKey, options, state) {
         var date = null;
@@ -153,7 +252,8 @@ export default class CopyEditActivity extends Component {
             rightgettype: data.rightgettype,
             righttoattributionway: data.righttoattributionway,
             righttoattributionstatuss: data.righttoattributionstatuss,
-            copyrightcityname: data.copyrightcityname
+            copyrightcityname: data.copyrightcityname,
+            show: false,
 
         })
     }
@@ -164,10 +264,6 @@ export default class CopyEditActivity extends Component {
             }
         );
 
-    }
-    _addImage() {
-
-        alert('add_img');
     }
     _renderWorkItem = (itemData, index) => {
         return <View style={{ alignItems: 'center', justifyContent: 'flex-end', marginLeft: 10 }}>
@@ -273,7 +369,54 @@ export default class CopyEditActivity extends Component {
      */
     _addPerson(state) {
 
-        alert(state);
+        switch (state) {
+
+            case '0':
+                this.props.navigator.push({
+                    component: AddCopyPersonActivity,
+                    params: {
+                        returnData: (reponseData) => this._getPersonData(reponseData, state)
+
+                    }
+                })
+                break
+            case '1':
+                this.props.navigator.push({
+                    component: AddOuthorActivity,
+                    params: {
+                        returnData: (reponseData) => this._getPersonData(reponseData, state)
+
+                    }
+                })
+
+                break
+
+        }
+
+    }
+    _getPersonData(person, state) {
+        switch (state) {
+
+            case '0'://添加著作权人
+                var list = this.state.copyrightpersons;
+                list.push(person);
+                this.setState({
+                    copyrightpersons: list
+
+                })
+                break
+            case '1'://添加作者
+                var list = this.state.authorPersons;
+                list.push(person);
+                this.setState({
+                    authorPersons: list
+
+                })
+                break
+
+        }
+
+
 
     }
     _getReturnData(reponseData, state) {
@@ -622,7 +765,7 @@ export default class CopyEditActivity extends Component {
     render() {
         return (
             <View style={styles.page}>
-                {/* {this.state.show == true ? (<LoadView />) : (null)} */}
+                {this.state.show == true ? (<LoadView />) : (null)}
                 <View style={styles.container}>
                     <StatusBar
                         animated={true}
@@ -659,7 +802,7 @@ export default class CopyEditActivity extends Component {
                                     data={this.state.workList}>
                                 </FlatList>
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                    <TouchableNativeFeedback onPress={() => this._addImage()} >
+                                    <TouchableNativeFeedback onPress={() => this.choosePic()} >
                                         <Image style={{ width: 60, height: 60, marginRight: 5, marginLeft: 5 }} source={ADD_IMG} />
                                     </TouchableNativeFeedback>
                                     <Image style={{ width: 14, height: 14, justifyContent: 'flex-end', marginRight: 10 }} source={ICON_MORE} />
