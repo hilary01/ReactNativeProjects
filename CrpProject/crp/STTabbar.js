@@ -20,10 +20,10 @@ const PERSONAL_NORMAL = require('./images/tabs/tab_my_n.png');
 const PERSONAL_FOCUS = require('./images/tabs/tab_my_h.png');
 import HomePage from './home';
 
-import MessageComponent from './message';
+import ApplyComponent from './menu_dialog';
 import ContactComponent from './contact';
 
- export default class STTabbar extends Component {
+export default class STTabbar extends Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -31,7 +31,8 @@ import ContactComponent from './contact';
             anim: new Animated.Value(0),
             startAngle: '0deg',
             endAngle: '45deg',
-            isshow: false
+            isshow: false,
+            show_menu: true
 
         };
     }
@@ -98,8 +99,7 @@ import ContactComponent from './contact';
 
 
                     }}>
-
-                    <MessageComponent {...this.props} />
+                    <ApplyComponent visible={this.state.show_menu} ref="MenuDialog" {...this.props} />
                 </TabNavigator.Item>
                 <TabNavigator.Item
                     selected={this.state.selectedTab === PERSONAL}
@@ -124,17 +124,17 @@ const styles = StyleSheet.create({
     },
     tabText: {
         color: '#929292',
-        fontSize:12
-        
-    },selectedTabText: {
+        fontSize: 12
+
+    }, selectedTabText: {
         color: '#028ce6',
-        fontSize:12
-    },apply_icon: {
+        fontSize: 12
+    }, apply_icon: {
         width: 30,
         height: 30,
     },
     applydTabText: {
         color: '#929292',
-        fontSize:0
+        fontSize: 0
     }
 });

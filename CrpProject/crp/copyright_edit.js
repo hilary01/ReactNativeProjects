@@ -10,7 +10,8 @@ import {
     ScrollView,
     TextInput,
     DatePickerAndroid,
-    ToastAndroid
+    ToastAndroid,
+    Button
 } from 'react-native';
 import Global from './global';
 import PublicTitle from './public_title';
@@ -19,7 +20,6 @@ import NetUitl from './netUitl';
 import StringUtil from './StringUtil';
 var BACK_ICON = require('./images/tabs/nav_return.png');
 import StringBufferUtils from './StringBufferUtil';
-var DETAIL_URL = 'http://drmlum.rdgchina.com/drmapp/copyright/detail';
 const ICON_MORE = require('./images/tabs/icon_more.png');
 var IMAGE_DEFAULT = require('./images/tabs/defalut_img.png');
 var ADD_IMG = require('./images/tabs/icon_addimg.png');
@@ -34,6 +34,8 @@ var type_id = '';
 var organizationId = '';
 var calsh_list = [];
 var UPLOAD_URL = 'http://drmlum.rdgchina.com/drmapp/drmfile/upload';
+var APPLY_URL = 'http://drmlum.rdgchina.com/drmapp/copyright/apply';
+var SAVE_URL = 'http://drmlum.rdgchina.com/drmapp/copyright/save';
 //图片选择器
 var ImagePicker = require('react-native-image-picker');
 //图片选择器参数设置
@@ -90,6 +92,244 @@ export default class CopyEditActivity extends Component {
 
         };
     }
+    _submiteBtn(state) {
+        var work_name = this.state.work_name;
+        var workList = this.state.workList;
+        var description = this.state.description;
+        var copyrightpersons = this.state.copyrightpersons;
+        var authorPersons = this.state.authorPersons;
+        var finisheddatetime = this.state.finisheddatetime;
+        var finishedaddress = this.state.finishedaddress;
+        var show_pubaddress = this.state.show_pubaddress;//发表状态
+        var initilizepublishedsite = this.state.initilizepublishedsite;
+        var initilizepublisheddatetime = this.state.initilizepublisheddatetime;
+        var real_name = this.state.real_name;
+        var phone = this.state.phone;
+        var rightgettype = this.state.rightgettype;
+        var righttoattributionstatuss = this._getPowerSize(this.state.righttoattributionstatuss);
+        if (state == '0') {//发送申请
+
+            if (null != workList && workList.length <= 0) {
+
+                ToastAndroid.show('请上传您的作品', ToastAndroid.SHORT);
+                return;
+            }
+            if (!StringUtil.isNotEmpty(work_name)) {
+
+                ToastAndroid.show('请输入您的作品名称', ToastAndroid.SHORT);
+                return;
+            }
+            if (!StringUtil.isNotEmpty(description)) {
+
+                ToastAndroid.show('请输入您的作品说明', ToastAndroid.SHORT);
+                return;
+            }
+            if (null != copyrightpersons && copyrightpersons.length <= 0) {
+
+                ToastAndroid.show('请添加著作权人信息', ToastAndroid.SHORT);
+                return;
+            }
+            if (null != authorPersons && authorPersons.length <= 0) {
+
+                ToastAndroid.show('请添加作者信息', ToastAndroid.SHORT);
+                return;
+            }
+            if (!StringUtil.isNotEmpty(this.state.rightcreatetype)) {
+
+                ToastAndroid.show('请选择作品创作性质', ToastAndroid.SHORT);
+                return;
+            }
+            if (!StringUtil.isNotEmpty(finisheddatetime)) {
+
+                ToastAndroid.show('请选择创作/制作完成日期', ToastAndroid.SHORT);
+                return;
+            }
+            if (!StringUtil.isNotEmpty(finishedaddress)) {
+
+                ToastAndroid.show('请选择创作/制作完成地址', ToastAndroid.SHORT);
+                return;
+            }
+            if (show_pubaddress) {
+
+                if (!StringUtil.isNotEmpty(initilizepublishedsite)) {
+
+                    ToastAndroid.show('请选择首次发表地址', ToastAndroid.SHORT);
+                    return;
+                }
+                if (!StringUtil.isNotEmpty(initilizepublisheddatetime)) {
+
+                    ToastAndroid.show('请选择首次发表日期', ToastAndroid.SHORT);
+                    return;
+                }
+
+            }
+            if (!StringUtil.isNotEmpty(real_name)) {
+
+                ToastAndroid.show('请输入您的真实名字', ToastAndroid.SHORT);
+                return;
+            }
+            if (!StringUtil.isNotEmpty(phone)) {
+
+                ToastAndroid.show('请输入您的电话号码', ToastAndroid.SHORT);
+                return;
+            }
+
+            if (!StringUtil.isNotEmpty(this.state.rightgettype)) {
+
+                ToastAndroid.show('请选择您的权利取得方式', ToastAndroid.SHORT);
+                return;
+            }
+
+            if (!StringUtil.isNotEmpty(this.state.righttoattributionway)) {
+
+                ToastAndroid.show('请选择您的权利归属方式', ToastAndroid.SHORT);
+                return;
+            }
+
+            if (righttoattributionstatuss <= 0) {
+
+                ToastAndroid.show('请选择您的权利拥有情况', ToastAndroid.SHORT);
+                return;
+            }
+            if (!StringUtil.isNotEmpty(this.state.detailEntity.selectcopyrightcity)) {
+
+                ToastAndroid.show('请选择您的办理机构', ToastAndroid.SHORT);
+                return;
+            }
+        } else {//保存信息
+
+
+            if (!StringUtil.isNotEmpty(work_name)) {
+
+                ToastAndroid.show('请输入您的作品名称', ToastAndroid.SHORT);
+                return;
+            }
+            if (!StringUtil.isNotEmpty(this.state.rightcreatetype)) {
+
+                ToastAndroid.show('请选择作品创作性质', ToastAndroid.SHORT);
+                return;
+            }
+            if (show_pubaddress) {
+
+                if (!StringUtil.isNotEmpty(initilizepublishedsite)) {
+
+                    ToastAndroid.show('请选择首次发表地址', ToastAndroid.SHORT);
+                    return;
+                }
+                if (!StringUtil.isNotEmpty(initilizepublisheddatetime)) {
+
+                    ToastAndroid.show('请选择首次发表日期', ToastAndroid.SHORT);
+                    return;
+                }
+
+            }
+            if (!StringUtil.isNotEmpty(real_name)) {
+
+                ToastAndroid.show('请输入您的真实名字', ToastAndroid.SHORT);
+                return;
+            }
+            if (!StringUtil.isNotEmpty(phone)) {
+
+                ToastAndroid.show('请输入您的电话号码', ToastAndroid.SHORT);
+                return;
+            }
+
+            if (!StringUtil.isNotEmpty(this.state.rightgettype)) {
+
+                ToastAndroid.show('请选择您的权利取得方式', ToastAndroid.SHORT);
+                return;
+            }
+
+            if (!StringUtil.isNotEmpty(this.state.righttoattributionway)) {
+
+                ToastAndroid.show('请选择您的权利归属方式', ToastAndroid.SHORT);
+                return;
+            }
+
+            if (righttoattributionstatuss <= 0) {
+
+                ToastAndroid.show('请选择您的权利拥有情况', ToastAndroid.SHORT);
+                return;
+            }
+            if (!StringUtil.isNotEmpty(this.state.detailEntity.selectcopyrightcity)) {
+
+                ToastAndroid.show('请选择您的办理机构', ToastAndroid.SHORT);
+                return;
+            }
+
+        }
+
+        this.setState({
+
+            show: true
+
+        })
+        StringBufferUtils.init();
+        StringBufferUtils.append('id=' + this.state.detailEntity.id);
+        StringBufferUtils.append('&userid=' + Global.userId);
+        StringBufferUtils.append('&name=' + work_name);
+        StringBufferUtils.append('&creativedescription=' + description);
+        StringBufferUtils.append('&category=' + this.state.detailEntity.category);
+        StringBufferUtils.append('&finishedaddress=' + finishedaddress);
+        StringBufferUtils.append('&finisheddatetime=' + finisheddatetime);
+        StringBufferUtils.append('&publishstatus=' + this.state.selectedIndex);
+        StringBufferUtils.append('&initilizepublisheddatetime=' + initilizepublisheddatetime);
+        StringBufferUtils.append('&countryid=' + this.state.countryId);
+        StringBufferUtils.append('&provinceid=' + this.state.provinceId);
+        StringBufferUtils.append('&cityid=' + this.state.cityId);
+        StringBufferUtils.append('&righttoattributionway=' + this.state.righttoattributionway);
+        StringBufferUtils.append('&initilizepublishedsite=' + initilizepublishedsite);
+        StringBufferUtils.append('&righttoattributionstatuss=' + this.state.righttoattributionstatuss);
+        StringBufferUtils.append('&rightgettype=' + rightgettype);
+        StringBufferUtils.append('&rightcreatetype=' + this.state.rightcreatetype);
+        StringBufferUtils.append('&realname=' + real_name);
+        StringBufferUtils.append('&telephone=' + phone);
+        StringBufferUtils.append('&selectcopyrightcity=' + this.state.detailEntity.selectcopyrightcity);
+        StringBufferUtils.append('&storefile=' + JSON.stringify(workList));
+        StringBufferUtils.append('&copyrightowner=' + JSON.stringify(copyrightpersons));
+        StringBufferUtils.append('&authors=' + JSON.stringify(authorPersons));
+        let params = StringBufferUtils.toString();
+        this.fetchData(params, state)
+    }
+
+    fetchData(param, state) {
+        //get请求,以百度为例,没有参数,没有header
+        var that = this;
+        var url = '';
+
+        if (state == '0') {//申请
+            url = APPLY_URL;
+
+        } else {//保存
+            url = SAVE_URL;
+        }
+        // alert(url+param);
+        NetUitl.post(url, param, '', function (set) {
+            //下面的就是请求来的数据
+
+            if (null != set && null != set.return_code && set.return_code == '0') {
+                that.setState({
+
+                    show: false
+
+                })
+                if (state == '0') {
+                    that.props.navigator.popToTop({
+                    })
+                }
+                ToastAndroid.show(set.msg, ToastAndroid.SHORT);
+            } else {
+                ToastAndroid.show(set.msg, ToastAndroid.SHORT);
+                that.setState({
+                    show: false
+                });
+
+            }
+
+        })
+
+    }
+
     /**
     * 获取文件后缀名
     * @param {*} fileName 
@@ -229,7 +469,7 @@ export default class CopyEditActivity extends Component {
         var data = this.props.detail_entity;
         var index = parseInt(data.publishstatus);
         var flag = data.publishstatus == '1' ? true : false;
-        organizationId = data.selectcopyrightcity
+        organizationId = data.selectcopyrightcity;
         this.setState({
             detailEntity: data,
             workList: data.storefile,
@@ -598,7 +838,7 @@ export default class CopyEditActivity extends Component {
 
             var strs = new Array(); //定义一数组 
             strs = power.split(","); //字符分割
-            return strs.length + '项';
+            return strs.length;
         }
 
 
@@ -701,19 +941,14 @@ export default class CopyEditActivity extends Component {
         return name;
 
     }
-    _showRightBtn(state) {
+    _showRightBtn() {
         return <View style={styles.right_view} >
             <Text style={{
                 textAlign: 'center', width: 60, color: '#ffffff'
-            }} onPress={() => this._editInfo(state)}>
+            }} onPress={() => this._submiteBtn('1')}>
                 保存
                         </Text>
         </View>
-    }
-    _editInfo(state) {
-
-        alert('保存数据');
-
     }
     /**
      * 选择发表状态
@@ -783,7 +1018,7 @@ export default class CopyEditActivity extends Component {
                     <View style={styles.textview}>
                         <Text style={styles.textstyle} numberOfLines={1}>我的版权</Text>
                     </View>
-                    {this._showRightBtn(this.state.detailEntity.status)}
+                    {this._showRightBtn()}
 
                 </View>
                 <ScrollView>
@@ -975,7 +1210,7 @@ export default class CopyEditActivity extends Component {
                             <View style={{ backgroundColor: 'white', height: 50, flexDirection: 'row', alignItems: 'center' }}>
                                 <Text style={{ color: '#000000', paddingTop: 5, paddingBottom: 5, paddingLeft: 10, fontSize: 14, }}>权利拥有情况</Text>
                                 <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', flex: 1 }}>
-                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 10 }} onPress={() => { this._goPowerListActivity() }}>{this._getPowerSize(this.state.righttoattributionstatuss)}</Text>
+                                    <Text style={{ color: '#666666', paddingTop: 5, paddingBottom: 5, paddingLeft: 5, fontSize: 14, marginRight: 10 }} onPress={() => { this._goPowerListActivity() }}>{this._getPowerSize(this.state.righttoattributionstatuss)}项</Text>
                                     <Image style={{ width: 14, height: 14, justifyContent: 'flex-end', marginRight: 10 }} source={ICON_MORE} />
                                 </View>
 
@@ -992,6 +1227,10 @@ export default class CopyEditActivity extends Component {
 
                             </View>
                             <View style={{ height: 1, backgroundColor: '#e2e2e2', marginLeft: 10, marginRight: 10 }} />
+                        </View>
+                        <View style={{ justifyContent: 'flex-end', marginTop: 10 }}>
+                            <Button title={'发送申请'} color="#028CE5" onPress={() => this._submiteBtn('0')}
+                                style={{ flex: 1, height: 40, textAlign: 'center', lineHeight: 40, }} />
                         </View>
                         <CityPicker visible={this.state.show_city_picker} callbackParent={() => this.pushDetails()} ref="cPicker" />
                     </View>

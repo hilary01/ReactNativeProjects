@@ -392,8 +392,6 @@ export default class AddAuthorActivity extends Component {
 
                             <Image style={{ height: 80, width: 100, resizeMode: 'stretch', }} source={(this.state.show_img == '' ? ADD_ICON : { uri: this.state.show_img })} />
                             <Text style={{ fontSize: 13, }}>{this.state.credentials}正面照</Text>
-
-
                         </View>
                     </TouchableNativeFeedback>
                 </View>
