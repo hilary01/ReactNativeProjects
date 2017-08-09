@@ -12,7 +12,8 @@ import {
 	TouchableNativeFeedback,
 	FlatList,
 	Image,
-	ToastAndroid
+	ToastAndroid,
+	Animated
 } from 'react-native';
 
 import PickerAndroid from 'react-native-picker-android';
@@ -42,6 +43,8 @@ var MENU_ICON_13 = require('./images/tabs/icon_shezhi.png');
 var MENU_ICON_14 = require('./images/tabs/icon_map.png');
 var MENU_ICON_15 = require('./images/tabs/icon_shejitu.png');
 var MENU_ICON_16 = require('./images/tabs/icon_other.png');
+const APPLY_FOCUS = require('./images/tabs/tab_apply_h.png');
+const APPLY_NORMAL = require('./images/tabs/tab_apply_n.png');
 export default class MenuDialog extends Component {
 
 	constructor(props, context) {
@@ -49,7 +52,10 @@ export default class MenuDialog extends Component {
 		this.state = {
 			isLoading: true,
 			visible: this.props.visible,
-			menuList: {}
+			menuList: {},
+			anim: new Animated.Value(0),
+			startAngle: '0deg',
+			endAngle: '45deg',
 
 
 		}
@@ -58,10 +64,11 @@ export default class MenuDialog extends Component {
 
 	initData() {
 		var list = new Array();
-		for (var i = 0; i < menuName.length / 2; i++) {
+		for (var i = 0; i < menuName.length; i++) {
 			var obj = new Object();
 			obj.name = menuName[i];
 			obj.id = menuId[i];
+			obj.key=menuId[i];
 			list.push(obj);
 
 
@@ -91,16 +98,45 @@ export default class MenuDialog extends Component {
 	}
 	componentWillMount() {
 		this.initData();
+		// this._gestureHandlers = {
+		// 	onStartShouldSetResponder: () => true,
+		// 	onMoveShouldSetResponder: () => true,
+		// 	onResponderGrant: () => {//通过move或者touch被激活
+		// 	},
+		// 	onResponderMove: () => {//在执行move
+		// 	},
+		// 	onResponderRelease: () => {//最后执行release
+		// 	}
+		// }
 	}
-	showToast = () => {
 
-		ToastAndroid.show('抱歉由于版权局权限原因，暂不支持点击', ToastAndroid.SHORT);
+	_dismissMenu() {
+
+		this.setState({
+			startAngle: '45deg',
+			endAngle: '0deg',
+		});
+
+		Animated.spring(
+			this.state.anim,
+			{
+				toValue: 0,
+				friction: 0,
+			}
+		).start();
+		this.setState({ visible: false });
+		this.props.navigator.popToTop({
+		})
+	}
+	showToast = (itemData) => {
+
+		ToastAndroid.show('您点击了第' + itemData.index + '项', ToastAndroid.SHORT);
 	}
 	//返回通知公告
 	_renderMenuItem = (itemData, index) => {
 		return (
 			<View style={{ height: 84, width: ScreenWidth / 4, justifyContent: 'center', backgroundColor: '#F6F9FF' }}>
-				<TouchableNativeFeedback onPress={this.showToast}>
+				<TouchableNativeFeedback onPress={() => this.showToast(itemData)}>
 					{this._makeGridView(itemData)}
 				</TouchableNativeFeedback>
 			</View>
@@ -176,7 +212,7 @@ export default class MenuDialog extends Component {
 	_renderItem() {
 		{/* columnWrapperStyle={{ borderWidth: 0, borderColor: '#ffffff' }} */ }
 
-		return <View style={{ flex: 1, alignItems: 'flex-start', marginTop: ScreenHegiht - 200 }}>
+		return <View style={{ flex: 1, alignItems: 'flex-start', marginTop: ScreenHegiht - 450 }}>
 
 			<View >
 
@@ -191,7 +227,27 @@ export default class MenuDialog extends Component {
 					)}
 				>
 				</FlatList>
+				<TouchableNativeFeedback onPress={() => {
+					this._dismissMenu()
+				}}>
+					<View style={{ alignItems: 'center', justifyContent: 'center', bottom: 20 }}>
+						<Animated.Image source={APPLY_FOCUS} style={[styles.apply_icon, {
+							transform: [
+								{
 
+									rotate: this.state.anim.interpolate({
+										inputRange: [0, 1],
+										outputRange: [
+											this.state.startAngle, this.state.endAngle
+										],
+									})
+								},
+							]
+						}
+						]}>
+						</Animated.Image>
+					</View>
+				</TouchableNativeFeedback>
 			</View>
 
 		</View>
@@ -208,7 +264,7 @@ export default class MenuDialog extends Component {
 				>
 					<TouchableOpacity style={{ flex: 1 }} activeOpacity={1} onPress={this.close}//点击灰色区域消失  
 					>
-						<View style={styles.container} >
+						<View style={styles.container}>
 							{this._renderItem()}
 						</View>
 					</TouchableOpacity>
@@ -248,5 +304,8 @@ const styles = StyleSheet.create({
 		paddingLeft: 5,
 		fontSize: 13,
 		color: '#000000',
+	}, apply_icon: {
+		width: 30,
+		height: 30,
 	},
 });

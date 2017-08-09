@@ -32,7 +32,7 @@ export default class STTabbar extends Component {
             startAngle: '0deg',
             endAngle: '45deg',
             isshow: false,
-            show_menu: true
+            show_menu: false
 
         };
     }
@@ -71,7 +71,7 @@ export default class STTabbar extends Component {
                         ]}>
                         </Animated.Image>}
                     onPress={() => {
-                        if (this.state.isshow) {
+                        {/* if (this.state.isshow) {
                             this.setState({
                                 startAngle: '0deg',
                                 endAngle: '45deg',
@@ -95,10 +95,14 @@ export default class STTabbar extends Component {
                                 toValue: 0,
                                 friction: 0,
                             }
-                        ).start();
-
-
-                    }}>
+                        ).start(); */}
+                        this.props.navigator.push({
+                            component: ApplyComponent,
+                            params: {
+                            }
+                        })
+                    }}
+                >
                     <ApplyComponent visible={this.state.show_menu} ref="MenuDialog" {...this.props} />
                 </TabNavigator.Item>
                 <TabNavigator.Item
