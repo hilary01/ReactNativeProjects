@@ -17,7 +17,6 @@ import {
 } from 'react-native';
 
 import PickerAndroid from 'react-native-picker-android';
-
 let Picker = PickerAndroid;
 let PickerItem = Picker.Item;
 var Dimensions = require('Dimensions');
