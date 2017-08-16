@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {
     AppRegistry,
     StyleSheet,
@@ -28,6 +28,7 @@ import NoticeActivity from './notice_list';
 import LawActivity from './law_rule';
 import NewsActivity from './news_list';
 var ScreenWidth = Dimensions.get('window').width;
+
 export default class TopScreen extends Component {
     constructor(props) {
         super(props);
@@ -46,13 +47,16 @@ export default class TopScreen extends Component {
     componentDidMount() {
         this.fetchData(HOME_URL);
         this.mounted = true;
+
     }
-    // 数据请求 
+
+    // 数据请求
     fetchData(url) {
         var that = this;
+
         NetUitl.post(url, '', '', function (responseData) {
             //下面的就是请求来的数据
-            if (null != responseData && 'undefind' != responseData && responseData.return_code == '0') {
+            if (null != responseData && responseData.return_code == '0') {
                 that.setState({
                     dataSource: that.state.dataSource.cloneWithPages(responseData.adlist),
                 });
@@ -116,7 +120,7 @@ export default class TopScreen extends Component {
         var that = this;
         NetUitl.post(url, '', '', function (responseData) {
             //下面的就是请求来的数据
-            if (null != responseData && 'undefind' != responseData && responseData.return_code == '0') {
+            if (null != responseData && responseData.return_code == '0') {
                 that.saveCityData(responseData.result);
                 that.setState({
                     show: false
@@ -129,6 +133,7 @@ export default class TopScreen extends Component {
             }
         })
     }
+
     /**
      * 获取城市信息
      */
@@ -175,19 +180,21 @@ export default class TopScreen extends Component {
             }
         );
     }
+
     _renderAdvPage(item, pageID) {
         return (
             <Image
-                source={{ uri: item.imagefilepath }}
-                style={styles.img_item} />
+                source={{uri: item.imagefilepath}}
+                style={styles.img_item}/>
         );
     }
+
     // 返回国内法规Item
     _renderRuleItem = (itemData, index) => {
         return (
-            <View style={{ height: 60, justifyContent: 'center' }}>
+            <View style={{height: 60, justifyContent: 'center'}}>
                 <TouchableNativeFeedback onPress={() => this.clickItem(itemData, index)}>
-                    <View style={{ height: 60, flexDirection: 'column', justifyContent: 'center' }}>
+                    <View style={{height: 60, flexDirection: 'column', justifyContent: 'center'}}>
                         <Text style={styles.rule_item_title}>{itemData.item.title}</Text>
                         <Text style={styles.rule_item_time}>{itemData.item.publishtime}</Text>
 
@@ -199,13 +206,13 @@ export default class TopScreen extends Component {
     //返回版权资讯
     _renderNewsItem = (itemData, index) => {
         return (
-            <View style={{ height: 120, justifyContent: 'center' }}>
+            <View style={{height: 120, justifyContent: 'center'}}>
                 <TouchableNativeFeedback onPress={() => this.clickItem(itemData, index)}>
-                    <View style={{ height: 120, flexDirection: 'column', justifyContent: 'center' }}>
-                        <View style={{ flexDirection: 'row', justifyContent: 'center' }}>
+                    <View style={{height: 120, flexDirection: 'column', justifyContent: 'center'}}>
+                        <View style={{flexDirection: 'row', justifyContent: 'center'}}>
 
                             {this.imageNotEmpty(itemData.item.thumbpath)}
-                            <View style={{ height: 100, flexDirection: 'column', justifyContent: 'center' }}>
+                            <View style={{height: 100, flexDirection: 'column', justifyContent: 'center'}}>
 
                                 <Text style={styles.rule_item_title}>{itemData.item.title}</Text>
                                 <Text style={styles.rule_item_time}>{itemData.item.publishtime}</Text>
@@ -223,28 +230,44 @@ export default class TopScreen extends Component {
     _renderNoticeItem = (itemData, index) => {
         var types = this._getType(itemData.item.category);
         return (
-            <View style={{ height: 120, width: ScreenWidth/2-10, justifyContent: 'center', backgroundColor: '#F6F9FF' }}>
+            <View style={{
+                height: 120,
+                width: ScreenWidth / 2 - 10,
+                justifyContent: 'center',
+                backgroundColor: '#F6F9FF'
+            }}>
                 <TouchableNativeFeedback onPress={this.showToast}>
                     {this._makeGridView(itemData, types)}
                 </TouchableNativeFeedback>
             </View>
         );
     }
+
     /**
-     * 
-     * @param {*构建表格} item 
+     *
+     * @param {*构建表格} item
      */
     _makeGridView(itemData, types) {
         if (itemData.index % 2 == 0) {
 
 
-            return <View style={{ height: 120, width: ScreenWidth/2-20, flexDirection: 'row', justifyContent: 'center', marginLeft: 5 }}>
+            return <View style={{
+                height: 120,
+                width: ScreenWidth / 2 - 20,
+                flexDirection: 'row',
+                justifyContent: 'center',
+                marginLeft: 5
+            }}>
 
 
-
-                <View style={{ height: 120, width: ScreenWidth/2-20, flexDirection: 'column', justifyContent: 'center' }}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <Image style={{ width: 5, height: 5, marginLeft: 5 }} source={POINT_ICONS}></Image>
+                <View style={{
+                    height: 120,
+                    width: ScreenWidth / 2 - 20,
+                    flexDirection: 'column',
+                    justifyContent: 'center'
+                }}>
+                    <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                        <Image style={{width: 5, height: 5, marginLeft: 5}} source={POINT_ICONS}></Image>
                         <Text style={styles.notice_type_txt} numberOfLines={1}>{types}</Text>
                     </View>
                     <Text style={styles.notice_time} numberOfLines={1}>{itemData.item.name}</Text>
@@ -253,7 +276,7 @@ export default class TopScreen extends Component {
 
 
                 </View>
-                <View style={{ height: 120, width: 6, backgroundColor: '#ffffff' }}>
+                <View style={{height: 120, width: 6, backgroundColor: '#ffffff'}}>
 
                 </View>
 
@@ -262,9 +285,15 @@ export default class TopScreen extends Component {
 
         } else {
 
-            return <View style={{ height: 120, width: ScreenWidth/2-20, flexDirection: 'column', justifyContent: 'center', marginLeft: 5 }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                    <Image style={{ width: 5, height: 5, marginLeft: 5 }} source={POINT_ICONS}></Image>
+            return <View style={{
+                height: 120,
+                width: ScreenWidth / 2 - 20,
+                flexDirection: 'column',
+                justifyContent: 'center',
+                marginLeft: 5
+            }}>
+                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                    <Image style={{width: 5, height: 5, marginLeft: 5}} source={POINT_ICONS}></Image>
                     <Text style={styles.notice_type_txt} numberOfLines={1}>{types}</Text>
                 </View>
                 <Text style={styles.notice_time} numberOfLines={1}>{itemData.item.name}</Text>
@@ -277,20 +306,21 @@ export default class TopScreen extends Component {
 
 
     }
+
     //返回非空图片
     imageNotEmpty(path) {
 
 
         if (null != path && path != '') {
 
-            return <Image style={styles.news_img_item} source={{ uri: path }}></Image>;
+            return <Image style={styles.news_img_item} source={{uri: path}}></Image>;
         }
 
     }
 
     /**
      * 返回类型
-     * @param {*} typeStr 
+     * @param {*} typeStr
      */
     _getType(typeStr) {
         var typeTitle = '';
@@ -356,6 +386,7 @@ export default class TopScreen extends Component {
 
 
     }
+
     //点击列表点击每一行
     clickItem(item, index) {
         //或者写成 const navigator = this.props.navigator;
@@ -367,21 +398,20 @@ export default class TopScreen extends Component {
             params: {
                 root_url: item.item.tourl,
                 title: item.item.title,
+
             }
         })
     }
 
 
     showToast = () => {
-
         ToastAndroid.show('抱歉由于版权局权限原因，暂不支持点击', ToastAndroid.SHORT);
     }
     // 跳转到公告列表
     _goNoticeActivity = () => {
         this.props.navigator.push({
             component: NoticeActivity,
-            params: {
-            }
+            params: {}
         })
 
     }
@@ -389,8 +419,7 @@ export default class TopScreen extends Component {
     _goLawActivity = () => {
         this.props.navigator.push({
             component: LawActivity,
-            params: {
-            }
+            params: {}
         })
 
     }
@@ -399,30 +428,30 @@ export default class TopScreen extends Component {
     _goNewsActivity = () => {
         this.props.navigator.push({
             component: NewsActivity,
-            params: {
-            }
+            params: {}
         })
 
     }
     _separator = () => {
-        return <View style={{ height: 1, backgroundColor: '#e2e2e2' }} />;
+        return <View style={{height: 1, backgroundColor: '#e2e2e2'}}/>;
     }
     _keyExtractor = (item, index) => item.key;
+
     render() {
         return (
             <View style={styles.main_view}>
-                {this.state.show == true ? (<LoadView size={10} color="#FFF" />) : (null)}
+                {this.state.show == true ? (<LoadView size={10} color="#FFF"/>) : (null)}
                 <View style={styles.page}>
                     <ViewPager
-                        style={{ height: 140 }}
+                        style={{height: 140}}
                         dataSource={this.state.dataSource}
                         renderPage={this._renderAdvPage}
                         keyExtractor={this._keyExtractor}
                         isLoop={true}
-                        autoPlay={true} />
+                        autoPlay={true}/>
                 </View>
                 {/*相关法规*/}
-                <View style={{ backgroundColor: '#ffffff', marginTop: 3 }}>
+                <View style={{backgroundColor: '#ffffff', marginTop: 3}}>
 
 
                     <View style={styles.news_rule_view}>
@@ -437,12 +466,12 @@ export default class TopScreen extends Component {
                         <TouchableNativeFeedback onPress={this._goLawActivity}>
                             <View style={styles.rule_right}>
                                 <Text style={styles.rule_right_txt}>更多</Text>
-                                <Image style={styles.rule_right_img} source={RIGHT_ICONS} />
+                                <Image style={styles.rule_right_img} source={RIGHT_ICONS}/>
                             </View>
                         </TouchableNativeFeedback>
                     </View>
-                    <Image source={RULE_BG} style={{ height: 100 }} />
-                    <View style={{ height: 185 }}>
+                    <Image source={RULE_BG} style={{height: 100}}/>
+                    <View style={{height: 185}}>
 
 
                         <FlatList
@@ -455,7 +484,7 @@ export default class TopScreen extends Component {
                     </View>
                 </View>
                 {/*版权资讯*/}
-                <View style={{ backgroundColor: '#ffffff', marginTop: 8 }}>
+                <View style={{backgroundColor: '#ffffff', marginTop: 8}}>
 
 
                     <View style={styles.news_rule_view}>
@@ -469,13 +498,13 @@ export default class TopScreen extends Component {
                         <TouchableNativeFeedback onPress={this._goNewsActivity}>
                             <View style={styles.rule_right}>
                                 <Text style={styles.rule_right_txt}>更多</Text>
-                                <Image style={styles.rule_right_img} source={RIGHT_ICONS} />
+                                <Image style={styles.rule_right_img} source={RIGHT_ICONS}/>
                             </View>
                         </TouchableNativeFeedback>
 
                     </View>
 
-                    <View style={{ height: 360 }}>
+                    <View style={{height: 360}}>
 
 
                         <FlatList
@@ -489,7 +518,7 @@ export default class TopScreen extends Component {
                 </View>
 
                 {/*登记公告*/}
-                <View style={{ backgroundColor: '#ffffff', marginTop: 8 }}>
+                <View style={{backgroundColor: '#ffffff', marginTop: 8}}>
 
 
                     <View style={styles.news_rule_view}>
@@ -503,13 +532,13 @@ export default class TopScreen extends Component {
                         <TouchableNativeFeedback onPress={this._goNoticeActivity}>
                             <View style={styles.rule_right}>
                                 <Text style={styles.rule_right_txt}>更多</Text>
-                                <Image style={styles.rule_right_img} source={RIGHT_ICONS} />
+                                <Image style={styles.rule_right_img} source={RIGHT_ICONS}/>
                             </View>
                         </TouchableNativeFeedback>
 
                     </View>
 
-                    <View style={{ height: 255, paddingLeft: 5, paddingRight: 5 }}>
+                    <View style={{height: 255, paddingLeft: 5, paddingRight: 5}}>
 
 
                         <FlatList
@@ -517,9 +546,9 @@ export default class TopScreen extends Component {
                             renderItem={this._renderNoticeItem}
                             data={this.state.noticeData}
                             numColumns={2}
-                            columnWrapperStyle={{ borderWidth: 2, borderColor: '#ffffff' }}
+                            columnWrapperStyle={{borderWidth: 2, borderColor: '#ffffff'}}
                             getItemLayout={(data, index) => (
-                                { length: 104, offset: (104 + 4) * index, index }
+                                {length: 104, offset: (104 + 4) * index, index}
                             )}
                         >
                         </FlatList>

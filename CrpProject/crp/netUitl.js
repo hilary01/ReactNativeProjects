@@ -1,15 +1,11 @@
-
-
 /**
  * NetUitl 网络请求的实现
  * https://github.com/facebook/react-native
  */
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {
     ToastAndroid,
 } from 'react-native';
-import NetWorkTool from './network'
-import fetch from './fetch-polyfill';
 export default class NetUitl extends React.Component {
 
 
@@ -51,6 +47,7 @@ export default class NetUitl extends React.Component {
             console.log('请求失败');
         })
     }
+
     /*
      *  get请求
      *  url:请求地址
@@ -93,6 +90,7 @@ export default class NetUitl extends React.Component {
             return encodeURIComponent(key) + '=' + encodeURIComponent(val);
         }).join('&') : '';
     }
+
     /*
      *  post请求
      *  url:请求地址
@@ -107,15 +105,15 @@ export default class NetUitl extends React.Component {
                 'Content-Type': 'application/x-www-form-urlencoded',
             },
             body: params,
-            timeout: 60 * 1000
         })
             .then((response) => response.json())
             .then((responseJSON) => {
                 callback(responseJSON)
             }).catch((err) => {
-                ToastAndroid.show('服务器异常，请稍后再试！', ToastAndroid.SHORT);
-            }).done();
+            ToastAndroid.show('服务器异常，请稍后再试！', ToastAndroid.SHORT);
+        }).done();
     }
+
     static postMtheord(url, params, headers, callback) {
         fetch(url, {
             method: 'POST',
@@ -125,18 +123,18 @@ export default class NetUitl extends React.Component {
                 'Content-Type': 'application/x-www-form-urlencoded'
             },
             body: params,
-            timeout: 60 * 1000
         })
             .then((response) => response.json())
             .then((responseJSON) => {
                 callback(responseJSON)
             }).catch((err) => {
-                ToastAndroid.show('服务器异常，请稍后再试！', ToastAndroid.SHORT);
-            }).done();
+            ToastAndroid.show('服务器异常，请稍后再试！', ToastAndroid.SHORT);
+        }).done();
     }
+
     static uploadImage(url, path, fileName, callback) {
         let formData = new FormData();
-        let file = { uri: path, type: 'multipart/form-data', name: fileName };
+        let file = {uri: path, type: 'multipart/form-data', name: fileName};
 
         formData.append("upfile", file);
         fetch(url, {
@@ -151,9 +149,13 @@ export default class NetUitl extends React.Component {
 
                 callback(responseData);
             })
-            .catch((error) => { callback(error); }).done();;
+            .catch((error) => {
+                callback(error);
+            }).done();
+        ;
 
     }
+
     // let params = {'start':'0',limit:'20','isNeedCategory': true, 'lastRefreshTime': '2016-09-25 09:45:12'};
     //     NetUitl.post('http://www.pintasty.cn/home/homedynamic',params,'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiJVLTliZGJhNjBjMjZiMDQwZGJiMTMwYWRhYWVlN2FkYTg2IiwiZXhwaXJhdGlvblRpbWUiOjE0NzUxMTg4ODU4NTd9.ImbjXRFYDNYFPtK2_Q2jffb2rc5DhTZSZopHG_DAuNU',function (set) {
     //         //下面的就是请求来的数据
@@ -164,7 +166,6 @@ export default class NetUitl extends React.Component {
     //         //下面是请求下来的数据
     //         console.log(set)
     //     })
-
 
 
 }
